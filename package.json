@@ -5,8 +5,8 @@
     "main": "server/server.js",
     "scripts": {
         "build": "webpack --mode production",
-        "dev:client": "webpack serve --mode development",
-        "dev:server": "nodemon --watch server --ignore server/uploads server/server.js",
+        "dev:client": "webpack serve --mode development --host 0.0.0.0",
+        "dev:server": "nodemon --watch server --ignore server/uploads server/server.js --host 0.0.0.0",
         "dev": "concurrently \"npm:dev:*\" --kill-others",
         "start": "node server/server.js",
         "test": "jest"
