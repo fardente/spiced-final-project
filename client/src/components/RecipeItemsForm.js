@@ -8,7 +8,19 @@ export default function RecipeItemsForm({ recipe_items, editMode }) {
 
     useEffect(() => {
         setItems(recipe_items);
-        console.log(recipe_items, "changed");
+        console.log(recipe_items, "changed", {
+            ...recipe_items.filter(({ exists }) => !exists),
+        });
+        const existing = Object.assign(
+            {},
+            ...recipe_items
+                .filter(({ exists }) => !exists)
+                .map((item) => {
+                    return { [item.item_name]: item.id };
+                })
+        );
+        setFormData(existing);
+        console.log(existing);
     }, [recipe_items]);
 
     useEffect(() => {
@@ -16,7 +28,19 @@ export default function RecipeItemsForm({ recipe_items, editMode }) {
     }, [editMode]);
 
     function onChange(event) {
-        setFormData({ ...formData, [event.target.name]: event.target.value });
+        console.log("changevent", event.target.checked);
+        if (event.target.checked) {
+            setFormData({
+                ...formData,
+                [event.target.name]: event.target.value,
+            });
+        } else {
+            const tempData = { ...formData };
+            console.log("tempdata", tempData);
+            delete tempData[event.target.name];
+            console.log("after", tempData);
+            setFormData(tempData);
+        }
         console.log(formData);
     }
 
