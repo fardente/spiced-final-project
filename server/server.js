@@ -11,16 +11,43 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static(path.join(__dirname, "..", "client", "public")));
 
+// Get all Recipes
+app.get("/api/recipes", async (req, res) => {
+    console.log("getting recipes");
+    res.json(await db.getRecipes());
+});
+
+// Get recipe by id
+app.get("/api/recipes/:id", async (req, res) => {
+    console.log("getting recipe", req.params.id);
+    res.json(await db.getRecipe(req.params.id));
+});
+
+// Update a recipe
+app.put("/api/recipes", async (req, res) => {
+    console.log("server updateing recipe", req.params.id);
+    res.json(await db.updateRecipe(req.body));
+});
+
+// Get ingredients for a recipe
+app.get("/api/recipes/:id/items", async (req, res) => {
+    console.log("getting recipe items", req.params.id);
+    res.json(await db.getRecipeItems(req.params.id));
+});
+
+// Get all shopping items
 app.get("/api/shopping/items", async (req, res) => {
     console.log("getting shopping items");
     res.json(await db.getShoppingItems());
 });
 
+// Checkmark a shopping item
 app.put("/api/shopping/check", async (req, res) => {
     console.log("checking item", req.body);
     res.json(await db.checkShoppingItem(req.body));
 });
 
+// Delete a shopping item
 app.post("/api/shopping/delete", async (req, res) => {
     console.log("Server deleting item", req.body);
     res.json(await db.deleteShoppingItem(req.body));

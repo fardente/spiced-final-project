@@ -26,7 +26,7 @@ async function getShoppingItems() {
 async function checkShoppingItem({ id, checked }) {
     try {
         const { rows } = await db.query(
-            `UPDATE shopping_items SET checked = $2 WHERE id = $1`,
+            `UPDATE shopping_items SET checked = $2 WHERE id = $1 RETURNING *`,
             [id, checked]
         );
         console.log("rows check", rows);
@@ -49,6 +49,46 @@ async function deleteShoppingItem({ id }) {
     }
 }
 
+async function getRecipes() {
+    try {
+        const { rows } = await db.query(`SELECT * FROM recipes`, []);
+        console.log("rows", rows);
+        return rows;
+    } catch (error) {
+        console.error("Error getting recipes", error);
+    }
+}
+
+async function getRecipe(id) {
+    try {
+        const { rows } = await db.query(
+            `SELECT * FROM recipes
+        WHERE id = $1`,
+            [id]
+        );
+        console.log("db getRecipe", rows);
+        return rows;
+    } catch (error) {
+        console.error("Error getting recipe", id, error);
+    }
+}
+
+async function getRecipeItems(recipe_id) {
+    try {
+        const { rows } = await db.query(
+            `SELECT * FROM recipe_items
+            JOIN items
+            ON recipe_items.item_id = items.id
+            WHERE recipe_id = $1`,
+            [recipe_id]
+        );
+        console.log("db getRecipeItems", recipe_id, rows);
+        return rows;
+    } catch (error) {
+        console.error("Error getting RecipeItems", recipe_id, error);
+    }
+}
+
 async function addRecipe({ name, preparation }) {
     try {
         const { rows } = await db.query(
@@ -63,14 +103,14 @@ async function addRecipe({ name, preparation }) {
     }
 }
 
-async function updateRecipe({ name, preparation, id }) {
+async function updateRecipe({ recipe_name, recipe_preparation, id }) {
     try {
         const { rows } = await db.query(
             `UPDATE recipes
             SET recipe_name = $1, recipe_preparation = $2
             WHERE id = $3
             RETURNING *`,
-            [name, preparation, id]
+            [recipe_name, recipe_preparation, id]
         );
         console.log("db updateRecipe", rows);
         return rows;
@@ -95,6 +135,9 @@ module.exports = {
     getShoppingItems,
     checkShoppingItem,
     deleteShoppingItem,
+    getRecipes,
+    getRecipe,
+    getRecipeItems,
     addRecipe,
     updateRecipe,
     deleteRecipe,
