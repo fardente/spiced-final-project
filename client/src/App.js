@@ -14,8 +14,8 @@ export default function App() {
                         <Nav />
                     </header>
                     <Route exact path="/" component={ShoppingList} />
-                    <Route path="/recipes" component={RecipeList} />
-                    <Route path="/recipe/:id" component={RecipeDetails} />
+                    <Route exact path="/recipes" component={RecipeList} />
+                    <Route path="/recipes/:id" component={RecipeDetails} />
                 </section>
             </BrowserRouter>
         </div>
