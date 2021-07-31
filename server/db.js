@@ -23,6 +23,31 @@ async function getShoppingItems() {
     }
 }
 
+async function addShoppingItem(id) {
+    try {
+        const { rows } = await db.query(
+            `INSERT INTO shopping_items (item_id) VALUES ($1) ON CONFLICT DO NOTHING RETURNING *`,
+            [id]
+        );
+        return rows;
+    } catch (error) {
+        console.error("db add shopping items", id, error);
+    }
+}
+
+async function addShoppingItems(data) {
+    let result = [];
+    for (const item in data) {
+        try {
+            const { rows } = await addShoppingItem(data[item]);
+            result.push(rows);
+        } catch (error) {
+            console.error("db add multiple shopping items", data[item], error);
+        }
+    }
+    return result;
+}
+
 async function checkShoppingItem({ id, checked }) {
     try {
         const { rows } = await db.query(
@@ -48,6 +73,10 @@ async function deleteShoppingItem({ id }) {
         console.error("DB delete shopping item", error);
     }
 }
+
+// async function buyRecipe({}){
+
+// }
 
 async function getRecipes() {
     try {
@@ -76,9 +105,12 @@ async function getRecipe(id) {
 async function getRecipeItems(recipe_id) {
     try {
         const { rows } = await db.query(
-            `SELECT * FROM recipe_items
+            `SELECT *, CASE WHEN EXISTS
+            (SELECT * FROM shopping_items s WHERE s.item_id = ri.item_id)
+            THEN true ELSE false END AS exists
+            FROM recipe_items ri
             JOIN items
-            ON recipe_items.item_id = items.id
+            ON ri.item_id = items.id 
             WHERE recipe_id = $1`,
             [recipe_id]
         );
@@ -88,6 +120,21 @@ async function getRecipeItems(recipe_id) {
         console.error("Error getting RecipeItems", recipe_id, error);
     }
 }
+// async function getRecipeItems(recipe_id) {
+//     try {
+//         const { rows } = await db.query(
+//             `SELECT * FROM recipe_items
+//             JOIN items
+//             ON recipe_items.item_id = items.id
+//             WHERE recipe_id = $1`,
+//             [recipe_id]
+//         );
+//         console.log("db getRecipeItems", recipe_id, rows);
+//         return rows;
+//     } catch (error) {
+//         console.error("Error getting RecipeItems", recipe_id, error);
+//     }
+// }
 
 async function addRecipe({ name, preparation }) {
     try {
@@ -133,6 +180,8 @@ async function deleteRecipe({ id }) {
 }
 module.exports = {
     getShoppingItems,
+    addShoppingItem,
+    addShoppingItems,
     checkShoppingItem,
     deleteShoppingItem,
     getRecipes,

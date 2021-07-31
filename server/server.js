@@ -35,6 +35,12 @@ app.get("/api/recipes/:id/items", async (req, res) => {
     res.json(await db.getRecipeItems(req.params.id));
 });
 
+// Add ingredients to shopping list
+app.post("/api/recipes/buy", async (req, res) => {
+    console.log("putting stuff on the shopping list", req.body);
+    res.json(await db.addShoppingItems(req.body));
+});
+
 // Get all shopping items
 app.get("/api/shopping/items", async (req, res) => {
     console.log("getting shopping items");
