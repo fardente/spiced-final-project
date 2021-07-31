@@ -1,5 +1,6 @@
 import RecipeListItem from "./RecipeListItem";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 export default function RecipeList() {
@@ -12,6 +13,10 @@ export default function RecipeList() {
 
     return (
         <div>
+            <Link to="/recipes/add">
+                <button>Add Recipe</button>
+            </Link>
+
             <div>
                 {recipes.map((recipe) => (
                     <RecipeListItem
