@@ -41,7 +41,7 @@ INSERT INTO items (item_name) VALUES ('Wasser');
 
 
 
-INSERT INTO recipes (recipe_name) VALUES ('Pizza');
+INSERT INTO recipes (recipe_name, recipe_preparation) VALUES ('Pizza', '1. Teig ausbreiten \n 2. Teig bestreichen');
 
 INSERT INTO recipe_items (recipe_id, item_id) VALUES (1,7);
 INSERT INTO recipe_items (recipe_id, item_id) VALUES (1,6);
