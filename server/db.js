@@ -239,12 +239,29 @@ async function getIngredientIdByName(name) {
         console.error("db getIngredientIdByName error", error.message);
     }
 }
+
+// Search Ingredients
+async function searchIngredients(query) {
+    try {
+        const { rows } = await db.query(
+            `SELECT * FROM items WHERE item_name ILIKE $1`,
+            [query + "%"]
+        );
+        console.log("db searchIngredients found", rows);
+        return rows;
+    } catch (error) {
+        console.error("db searchIngredients", error);
+        throw error;
+    }
+}
+
 module.exports = {
     getShoppingItems,
     addShoppingItem,
     addShoppingItems,
     checkShoppingItem,
     deleteShoppingItem,
+    searchIngredients,
     getRecipes,
     getRecipe,
     getRecipeItems,

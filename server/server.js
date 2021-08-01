@@ -77,6 +77,17 @@ app.post("/api/shopping/delete", async (req, res) => {
     res.json(await db.deleteShoppingItem(req.body));
 });
 
+// Search ingredients
+app.get("/api/ingredients/search", async (req, res) => {
+    console.log(req.query.q);
+    try {
+        res.json(await db.searchIngredients(req.query.q));
+    } catch (error) {
+        res.status(500);
+        res.json({ ...error });
+    }
+});
+
 app.get("*", function (req, res) {
     console.log("*ing");
     res.sendFile(path.join(__dirname, "..", "client", "public", "index.html"));
