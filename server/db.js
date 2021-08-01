@@ -226,6 +226,16 @@ async function addIngredients({ ingredients }) {
     return ids;
 }
 
+async function getIngredients() {
+    try {
+        const { rows } = await db.query(`SELECT * FROM items`);
+        console.log("db getingredients rows", rows);
+        return rows;
+    } catch (error) {
+        console.error("db getIngredients error", error.message);
+    }
+}
+
 async function getIngredientIdByName(name) {
     try {
         const { rows } = await db.query(
@@ -268,6 +278,7 @@ module.exports = {
     addRecipe,
     updateRecipe,
     deleteRecipe,
+    getIngredients,
     addIngredients,
     addIngredient,
     addRecipeIngredients,

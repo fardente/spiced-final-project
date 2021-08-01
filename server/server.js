@@ -77,6 +77,12 @@ app.post("/api/shopping/delete", async (req, res) => {
     res.json(await db.deleteShoppingItem(req.body));
 });
 
+// Get ingredients
+app.get("/api/ingredients", async (req, res) => {
+    console.log("Server get ingredients");
+    res.json(await db.getIngredients());
+});
+
 // Search ingredients
 app.get("/api/ingredients/search", async (req, res) => {
     console.log(req.query.q);
