@@ -23,6 +23,29 @@ app.get("/api/recipes/:id", async (req, res) => {
     res.json(await db.getRecipe(req.params.id));
 });
 
+// Add recipe
+app.post("/api/recipes/add", async (req, res) => {
+    console.log("server adding recipe", req.body);
+    //addRecipe -> recipe_id
+    const recipe_id = await db.addRecipe(req.body);
+    //addIngredients -> [item_ids]
+    const ingredient_ids = await db.addIngredients(req.body);
+    // handle recipe exists
+    console.log(recipe_id, ingredient_ids);
+    if (recipe_id.error) {
+        console.log("rezepterror", recipe_id);
+        res.statusCode = 400;
+        res.json(recipe_id);
+        return;
+    }
+    // addRecipeIngredients
+    const recipeItems = { recipe_id, ingredient_ids };
+    console.log("recipeItems", recipeItems);
+    const recipeItemsResult = await db.addRecipeIngredients(recipeItems);
+    console.log(recipeItemsResult);
+    res.json(recipeItemsResult);
+});
+
 // Update a recipe
 app.put("/api/recipes", async (req, res) => {
     console.log("server updateing recipe", req.params.id);
