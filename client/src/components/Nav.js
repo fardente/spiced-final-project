@@ -6,6 +6,7 @@ export default function Nav() {
             Nav
             <Link to="/">Shopping List</Link>
             <Link to="/recipes">Recipes</Link>
+            <Link to="/ingredients">Ingredients</Link>
         </div>
     );
 }
