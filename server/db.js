@@ -16,7 +16,6 @@ async function getShoppingItems() {
             ON i.id = s.item_id`,
             []
         );
-        console.log("rows", rows);
         return rows;
     } catch (error) {
         console.error("Error getting shopping items", error);
@@ -54,7 +53,6 @@ async function checkShoppingItem({ id, checked }) {
             `UPDATE shopping_items SET checked = $2 WHERE id = $1 RETURNING *`,
             [id, checked]
         );
-        console.log("rows check", rows);
         return rows;
     } catch (error) {
         console.error("DB check item", error);
@@ -67,21 +65,15 @@ async function deleteShoppingItem({ id }) {
             `DELETE FROM shopping_items WHERE id = $1`,
             [id]
         );
-        console.log("deleteShoppingItems", rows);
         return rows;
     } catch (error) {
         console.error("DB delete shopping item", error);
     }
 }
 
-// async function buyRecipe({}){
-
-// }
-
 async function getRecipes() {
     try {
         const { rows } = await db.query(`SELECT * FROM recipes`, []);
-        console.log("rows", rows);
         return rows;
     } catch (error) {
         console.error("Error getting recipes", error);
@@ -95,10 +87,9 @@ async function getRecipe(id) {
         WHERE id = $1`,
             [id]
         );
-        console.log("db getRecipe", rows);
         return rows;
     } catch (error) {
-        console.error("Error getting recipe", id, error);
+        console.error("db getRecipe error", id, error);
     }
 }
 
@@ -114,10 +105,9 @@ async function getRecipeItems(recipe_id) {
             WHERE recipe_id = $1`,
             [recipe_id]
         );
-        console.log("db getRecipeItems", recipe_id, rows);
         return rows;
     } catch (error) {
-        console.error("Error getting RecipeItems", recipe_id, error);
+        console.error("db getRecipeItems Error", recipe_id, error);
     }
 }
 // async function getRecipeItems(recipe_id) {
@@ -136,17 +126,17 @@ async function getRecipeItems(recipe_id) {
 //     }
 // }
 
-async function addRecipe({ name, preparation }) {
+async function addRecipe({ recipe_name, recipe_preparation }) {
     try {
         const { rows } = await db.query(
             `INSERT INTO recipes (recipe_name, recipe_preparation)
-             VALUES ($1, $2) RETURNING *`,
-            [name, preparation]
+             VALUES ($1, $2) RETURNING id`,
+            [recipe_name, recipe_preparation]
         );
-        console.log("db addRecipe", rows);
-        return rows;
+        return rows[0].id;
     } catch (error) {
-        console.error("DB addrecipe", error);
+        console.error("DB addRecipe", error.detail);
+        return { error: error.detail };
     }
 }
 
@@ -159,7 +149,6 @@ async function updateRecipe({ recipe_name, recipe_preparation, id }) {
             RETURNING *`,
             [recipe_name, recipe_preparation, id]
         );
-        console.log("db updateRecipe", rows);
         return rows;
     } catch (error) {
         console.error("DB updateRecipe", error);
@@ -172,10 +161,82 @@ async function deleteRecipe({ id }) {
             `DELETE FROM recipes WHERE id = $1 RETURNING *`,
             [id]
         );
-        console.log("DB deleteRecipe", rows);
         return rows;
     } catch (error) {
         console.error("DB deleteRecipe", error);
+    }
+}
+
+async function addRecipeIngredient(recipe_id, item_id) {
+    try {
+        const { rows } = await db.query(
+            `INSERT INTO recipe_items
+            (recipe_id, item_id) VALUES ($1,$2) 
+            RETURNING *`,
+            [recipe_id, item_id]
+        );
+        return rows[0];
+    } catch (error) {
+        console.error("db addRecipeIngredient", error);
+    }
+}
+
+async function addRecipeIngredients({ recipe_id, ingredient_ids }) {
+    let result = [];
+    for (const item_id of ingredient_ids) {
+        try {
+            const id = await addRecipeIngredient(recipe_id, item_id);
+            result.push(id);
+        } catch (error) {
+            console.error("db addRecipeIngredients", item_id, error);
+        }
+    }
+    return result;
+}
+
+async function addIngredient(name) {
+    if (name == "") return;
+    try {
+        let result = await getIngredientIdByName(name);
+        if (!result) {
+            const { rows } = await db.query(
+                `INSERT INTO items (item_name) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id`,
+                [name]
+            );
+            result = rows[0].id;
+        }
+        return result;
+    } catch (error) {
+        console.error("db addIngredient", name, error.detail);
+    }
+}
+
+async function addIngredients({ ingredients }) {
+    let ids = [];
+    for (const item of ingredients) {
+        if (item == "") continue;
+        try {
+            const result = await addIngredient(item);
+            ids.push(result);
+        } catch (error) {
+            console.error("db addIngredients", item, error);
+        }
+    }
+    // console.log("db addIngredients ids", ids);
+    return ids;
+}
+
+async function getIngredientIdByName(name) {
+    try {
+        const { rows } = await db.query(
+            `SELECT id FROM items WHERE item_name = $1`,
+            [name]
+        );
+        const id = rows[0].id;
+        // console.log("db getingredientbyname", rows, id);
+        return id;
+    } catch (error) {
+        console.error("db getIngredientIdByName error", error.message);
     }
 }
 module.exports = {
@@ -190,4 +251,9 @@ module.exports = {
     addRecipe,
     updateRecipe,
     deleteRecipe,
+    addIngredients,
+    addIngredient,
+    addRecipeIngredients,
+    addRecipeIngredient,
+    getIngredientIdByName,
 };
