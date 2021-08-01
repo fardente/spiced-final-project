@@ -5,11 +5,23 @@ import axios from "axios";
 
 export default function ShoppingList() {
     const [items, setItems] = useState([]);
+    const [tempItems, setTempItems] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(async () => {
         const { data } = await axios.get("/api/shopping/items");
         setItems(data);
+        setTempItems(data);
     }, []);
+
+    useEffect(() => {
+        const res = tempItems.filter(
+            (x) =>
+                x.item_name.toLowerCase().indexOf(searchTerm.toLowerCase()) !=
+                -1
+        );
+        setItems(res);
+    }, [searchTerm]);
 
     async function onDelete(id) {
         try {
@@ -36,8 +48,18 @@ export default function ShoppingList() {
         );
     }
 
+    function onSearch(event) {
+        setSearchTerm(event.target.value);
+    }
+
     return (
         <div>
+            <input
+                type="text"
+                name="searchTerm"
+                value={searchTerm}
+                onChange={(event) => onSearch(event)}
+            ></input>
             <div>
                 {items.map((item) => (
                     <ShoppingListItem
