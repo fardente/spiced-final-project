@@ -1,56 +1,87 @@
 import { useState, useEffect } from "react";
+import StatusMessage from "./StatusMessage";
 import axios from "axios";
 
 export default function RecipeForm() {
-    // const form = useRef(null);
     const [recipe, setRecipe] = useState({
         recipe_name: "",
         recipe_preparation: "",
     });
-    const [ingredients, setIngredients] = useState({ 0: "" });
+    const [ingredients, setIngredients] = useState([{ name: "" }]);
     const [errorMessage, setErrorMessage] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [currentIndex, setCurrentIndex] = useState("");
+
+    useEffect(() => {
+        if (searchTerm == "") {
+            setSearchResults([]);
+            return;
+        }
+        console.log("searching...", searchTerm);
+        axios.get("/api/ingredients/search?q=" + searchTerm).then((result) => {
+            setSearchResults(result.data);
+        });
+    }, [searchTerm]);
 
     function onChange(event) {
         setRecipe({
             ...recipe,
             [event.target.name]: event.target.value,
         });
+        console.log(ingredients);
     }
-    function onChangeIngredients(event) {
-        setIngredients({
-            ...ingredients,
-            [event.target.name]: event.target.value,
+    const onChangeIngredients = (index) => (event) => {
+        console.log("event", event, "idx", index);
+        let newIngrs = ingredients.map((ingr, idx) => {
+            if (index !== idx) return ingr;
+            return { ...ingr, name: event.target.value };
         });
-    }
+        setIngredients(newIngrs);
+        setSearchTerm(event.target.value);
+        setCurrentIndex(index);
+    };
 
     function onAdd(event) {
         event.preventDefault();
-        setIngredients({
-            ...ingredients,
-            [Object.values(ingredients).length]: "",
-        });
+        setIngredients([...ingredients, { name: "" }]);
     }
 
-    function onRemove(event) {
+    function onRemove(event, index) {
         event.preventDefault();
-        const tempData = { ...ingredients };
-        delete tempData[event.target.name];
-        setIngredients(tempData);
+        const tempData = [...ingredients];
+        setIngredients(tempData.filter((i, idx) => idx !== index));
     }
 
     async function onSubmit(event) {
         event.preventDefault();
+        if (recipe.recipe_name == "") {
+            setErrorMessage({ error: "Recipe name can't be empty!" });
+            return;
+        }
         try {
             const response = await axios.post("/api/recipes/add", {
-                ingredients: Object.values(ingredients).filter((x) => x != ""),
+                ingredients: ingredients.filter((x) => x != ""),
                 ...recipe,
             });
             console.log(response);
         } catch (error) {
-            setErrorMessage(error.response.data.error);
+            setErrorMessage({ error: error.response.data.error });
         }
         setRecipe({ recipe_name: "", recipe_preparation: "" });
-        setIngredients({ 0: "" });
+        setIngredients([{ name: "" }]);
+    }
+
+    function renderResults(index) {
+        if (index == currentIndex) {
+            return searchResults.map((item) => {
+                return (
+                    <div key={item.id} className="searchResult">
+                        <div className="itemInfo">{item.item_name}</div>
+                    </div>
+                );
+            });
+        }
     }
 
     return (
@@ -64,22 +95,23 @@ export default function RecipeForm() {
                         placeholder="Recipe Name"
                         onChange={(event) => onChange(event)}
                         value={recipe.recipe_name}
+                        required
                     ></input>
                 </div>
                 <div>
                     Zutaten:
-                    {Object.values(ingredients).map((item, index) => (
-                        <div key={item.name + index.toString()}>
+                    {ingredients.map((item, index) => (
+                        <div key={index.toString()}>
                             <input
-                                value={ingredients[index]}
+                                value={item.name}
                                 type="text"
-                                name={index}
-                                placeholder="New Ingredient..."
-                                onChange={(event) => onChangeIngredients(event)}
+                                placeholder="New ingredient..."
+                                onChange={onChangeIngredients(index)}
                             ></input>
+                            {renderResults(index)}
                             <button
                                 name={index}
-                                onClick={(event) => onRemove(event)}
+                                onClick={(event) => onRemove(event, index)}
                             >
                                 X
                             </button>
@@ -103,7 +135,7 @@ export default function RecipeForm() {
                 </div>
                 <button type="reset">reset</button>
             </form>
-            {errorMessage && <div>{errorMessage}</div>}
+            <StatusMessage message={errorMessage} />
         </div>
     );
 }
