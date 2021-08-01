@@ -214,9 +214,9 @@ async function addIngredient(name) {
 async function addIngredients({ ingredients }) {
     let ids = [];
     for (const item of ingredients) {
-        if (item == "") continue;
+        if (item.name == "") continue;
         try {
-            const result = await addIngredient(item);
+            const result = await addIngredient(item.name);
             ids.push(result);
         } catch (error) {
             console.error("db addIngredients", item, error);
