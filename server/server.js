@@ -1,10 +1,13 @@
 const express = require("express");
 const path = require("path");
 const db = require("./db");
+const uploader = require("./uploader");
+const { upload } = require("./s3");
 
 const app = express();
 
 const PORT = 3001;
+const awsBucketUrl = "https://nandoseimer.s3.amazonaws.com/";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -24,21 +27,45 @@ app.get("/api/recipes/:id", async (req, res) => {
 });
 
 // Add recipe
-app.post("/api/recipes/add", async (req, res) => {
-    //addRecipe -> get recipe_id
-    const recipe_id = await db.addRecipe(req.body);
-    //addIngredients -> get [item_ids]
-    const ingredient_ids = await db.addIngredients(req.body);
-    // handle recipe exists
-    if (recipe_id.error) {
-        res.statusCode = 400;
-        res.json(recipe_id);
-        return;
+app.post(
+    "/api/recipes/add",
+    uploader.single("file"),
+    upload,
+    async (req, res) => {
+        //addRecipe -> get recipe_id
+        const recipe_id = await db.addRecipe(req.body);
+        //addIngredients -> get [item_ids]
+        const ingredients = JSON.parse(req.body.ingredients);
+        const ingredient_ids = await db.addIngredients(ingredients);
+        // handle recipe exists
+        if (recipe_id.error) {
+            res.statusCode = 400;
+            res.json(recipe_id);
+            return;
+        }
+        // addRecipeIngredients
+        const recipeItems = { recipe_id, ingredient_ids };
+        const recipeItemsResult = await db.addRecipeIngredients(recipeItems);
+        // add image
+        req.body.url = awsBucketUrl + req.file.filename;
+        if (req.file) {
+            await db.updateImage(recipe_id, req.body.url);
+        }
+        res.json(recipeItemsResult);
     }
-    // addRecipeIngredients
-    const recipeItems = { recipe_id, ingredient_ids };
-    const recipeItemsResult = await db.addRecipeIngredients(recipeItems);
-    res.json(recipeItemsResult);
+);
+
+// Update image
+app.post("/api/upload", uploader.single("file"), upload, async (req, res) => {
+    req.body.url = awsBucketUrl + req.file.filename;
+    if (req.file) {
+        let result = await db.updateImage(req.body.recipe_id, req.body.url);
+        res.json(result);
+    } else {
+        res.json({
+            success: false,
+        });
+    }
 });
 
 // Update a recipe
@@ -63,6 +90,12 @@ app.post("/api/recipes/buy", async (req, res) => {
 app.get("/api/shopping/items", async (req, res) => {
     console.log("getting shopping items");
     res.json(await db.getShoppingItems());
+});
+
+// Add a shopping item
+app.post("/api/shopping/add", async (req, res) => {
+    console.log("server adding shopping item");
+    res.json(await db.addShoppingItem(req.body));
 });
 
 // Checkmark a shopping item

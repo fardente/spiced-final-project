@@ -167,6 +167,14 @@ async function deleteRecipe({ id }) {
     }
 }
 
+async function updateImage(id, image_url) {
+    const result = await db.query(
+        "UPDATE recipes SET image_url = $2 WHERE id = $1 RETURNING *",
+        [id, image_url]
+    );
+    return result.rows[0].iamge_url;
+}
+
 async function addRecipeIngredient(recipe_id, item_id) {
     try {
         const { rows } = await db.query(
@@ -211,7 +219,7 @@ async function addIngredient(name) {
     }
 }
 
-async function addIngredients({ ingredients }) {
+async function addIngredients(ingredients) {
     let ids = [];
     for (const item of ingredients) {
         if (item.name == "") continue;
@@ -278,6 +286,7 @@ module.exports = {
     addRecipe,
     updateRecipe,
     deleteRecipe,
+    updateImage,
     getIngredients,
     addIngredients,
     addIngredient,
