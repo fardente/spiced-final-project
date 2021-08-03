@@ -13,7 +13,9 @@ async function getShoppingItems() {
         const { rows } = await db.query(
             `SELECT s.id, s.checked, i.item_name FROM shopping_items AS s
             JOIN items as i
-            ON i.id = s.item_id`,
+            ON i.id = s.item_id
+            ORDER BY
+            s.checked ASC, s.id DESC`,
             []
         );
         return rows;
@@ -22,15 +24,31 @@ async function getShoppingItems() {
     }
 }
 
+async function addNewShoppingItem({ newItem }) {
+    try {
+        console.log("db addnews", newItem);
+        const id = await addIngredient(newItem);
+        console.log("added, new/old id: ", id);
+        const res = await addShoppingItem(id);
+        if (res.length < 1) return { error: "already on list" };
+        console.log("added so shopping:", res);
+        return res[0];
+    } catch (error) {
+        console.error("DB addNewShoppingItem error ", error);
+    }
+}
+
 async function addShoppingItem(id) {
+    console.log("adding shoopinitembyid", id);
     try {
         const { rows } = await db.query(
             `INSERT INTO shopping_items (item_id) VALUES ($1) ON CONFLICT DO NOTHING RETURNING *`,
             [id]
         );
+        console.log("adding shoppinbyid", rows);
         return rows;
     } catch (error) {
-        console.error("db add shopping items", id, error);
+        console.error("db add shopping item", id, error);
     }
 }
 
@@ -73,7 +91,10 @@ async function deleteShoppingItem({ id }) {
 
 async function getRecipes() {
     try {
-        const { rows } = await db.query(`SELECT * FROM recipes`, []);
+        const { rows } = await db.query(
+            `SELECT * FROM recipes ORDER BY id DESC`,
+            []
+        );
         return rows;
     } catch (error) {
         console.error("Error getting recipes", error);
@@ -127,6 +148,7 @@ async function getRecipeItems(recipe_id) {
 // }
 
 async function addRecipe({ recipe_name, recipe_preparation }) {
+    console.log("DB addRecipe adding", recipe_name, recipe_preparation);
     try {
         const { rows } = await db.query(
             `INSERT INTO recipes (recipe_name, recipe_preparation)
@@ -135,8 +157,8 @@ async function addRecipe({ recipe_name, recipe_preparation }) {
         );
         return rows[0].id;
     } catch (error) {
-        console.error("DB addRecipe", error.detail);
-        return { error: error.detail };
+        console.error("DB addRecipe", error);
+        return { error };
     }
 }
 
@@ -156,6 +178,7 @@ async function updateRecipe({ recipe_name, recipe_preparation, id }) {
 }
 
 async function deleteRecipe({ id }) {
+    console.log("db deleteRecipe id ", id);
     try {
         const { rows } = await db.query(
             `DELETE FROM recipes WHERE id = $1 RETURNING *`,
@@ -176,6 +199,7 @@ async function updateImage(id, image_url) {
 }
 
 async function addRecipeIngredient(recipe_id, item_id) {
+    console.log("db addRecipeIngredient", recipe_id, item_id);
     try {
         const { rows } = await db.query(
             `INSERT INTO recipe_items
@@ -206,14 +230,26 @@ async function addIngredient(name) {
     if (name == "") return;
     try {
         let result = await getIngredientIdByName(name);
-        if (!result) {
+        console.log(
+            result,
+            result.length > 0
+                ? `ingredient ${name} already existed`
+                : `ingredient ${name} didnt exist`
+        );
+        if (result.length > 0) {
+            return result[0].id;
+        } else {
             const { rows } = await db.query(
                 `INSERT INTO items (item_name) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id`,
                 [name]
             );
-            result = rows[0].id;
+            console.log("db addIngredient rows for", name, rows);
+            if (rows.length > 0) {
+                result = rows[0].id;
+                return result;
+            }
+            return null;
         }
-        return result;
     } catch (error) {
         console.error("db addIngredient", name, error.detail);
     }
@@ -250,9 +286,8 @@ async function getIngredientIdByName(name) {
             `SELECT id FROM items WHERE item_name = $1`,
             [name]
         );
-        const id = rows[0].id;
-        // console.log("db getingredientbyname", rows, id);
-        return id;
+        console.log("db getIngredientIdByName rows for", name, rows);
+        return rows;
     } catch (error) {
         console.error("db getIngredientIdByName error", error.message);
     }
@@ -275,6 +310,7 @@ async function searchIngredients(query) {
 
 module.exports = {
     getShoppingItems,
+    addNewShoppingItem,
     addShoppingItem,
     addShoppingItems,
     checkShoppingItem,
