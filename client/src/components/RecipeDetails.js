@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import axios from "axios";
 import RecipeItemsForm from "./RecipeItemsForm";
+// import Markdown from "./Markdown";
 
 export default function RecipeDetails() {
     const params = useParams();
-    const [recipe, setRecipe] = useState([]);
+    const [recipe, setRecipe] = useState({});
     const [recipeItems, setRecipeItems] = useState([]);
     const [editMode, setEditMode] = useState(false);
+    const history = useHistory();
+    // const [isActive, setIsActive] = useState(false);
 
     useEffect(async () => {
         const id = params.id;
@@ -38,31 +41,120 @@ export default function RecipeDetails() {
         setEditMode(!editMode);
     }
 
-    const editRender = <input type="text" placeholder="Name.."></input>;
+    function onChange(event) {
+        setRecipe({
+            ...recipe,
+            [event.target.name]: event.target.value,
+        });
+    }
+
+    async function deleteRecipe() {
+        try {
+            await axios.post("/api/recipes/delete", { id: params.id });
+            history.push("/recipes");
+        } catch (error) {
+            console.error("error deleting recipe", error);
+        }
+    }
+
+    // function onImageClick(event) {
+    //     setIsActive(!isActive);
+    // }
+
+    const editRender = (
+        <input
+            className="input is-info"
+            type="text"
+            name="recipe_name"
+            onChange={(event) => onChange(event)}
+            value={recipe.recipe_name}
+        ></input>
+    );
     // const ingredientsRender =
 
     return (
-        <div>
-            {editRender}
-            RecipeDetails{" "}
-            <button onClick={toggleEditMode}>
-                {editMode ? "Save" : "Edit"}
-            </button>
-            {recipe.recipe_name}
-            <RecipeItemsForm recipe_items={recipeItems} editMode={editMode} />
-            {editMode ? (
-                <textarea
-                    onChange={(event) =>
-                        setRecipe({
-                            ...recipe,
-                            recipe_preparation: event.target.value,
-                        })
-                    }
-                    defaultValue={recipe.recipe_preparation}
-                ></textarea>
-            ) : (
-                <code>{recipe.recipe_preparation}</code>
-            )}
+        <div className="container has-text-centered">
+            <section
+                className=" hero is-medium is-info"
+                style={{
+                    backgroundImage:
+                        "linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(" +
+                        recipe.image_url +
+                        ")",
+                    backgroundPosition: "center",
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                }}
+            >
+                <div className="hero-body">
+                    <p className="title">
+                        {editMode ? editRender : recipe.recipe_name}
+                    </p>
+                </div>
+            </section>
+
+            <div className="container mt-5">
+                {/* <img src={recipe.image_url} onClick={onImageClick}></img> */}
+                <div className="columns">
+                    <div className="column">
+                        <RecipeItemsForm
+                            recipe_items={recipeItems}
+                            editMode={editMode}
+                        />
+                    </div>
+                    <div className="column is-two-thirds">
+                        {editMode ? (
+                            <textarea
+                                className="textarea is-info"
+                                rows="15"
+                                name="recipe_preparation"
+                                onChange={(event) => onChange(event)}
+                                defaultValue={recipe.recipe_preparation}
+                            ></textarea>
+                        ) : (
+                            <div className="box">
+                                <div className="content preparation has-text-left">
+                                    {recipe.recipe_preparation}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="column">
+                        <div className="field is-grouped is-grouped-right">
+                            <div className="control">
+                                <button
+                                    className="button is-info"
+                                    onClick={toggleEditMode}
+                                >
+                                    {editMode ? "Save" : "Edit"}
+                                </button>
+                            </div>
+                            <div className="control">
+                                <button
+                                    className="button is-danger"
+                                    onClick={deleteRecipe}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* <Markdown></Markdown> */}
+                {/* <div
+                    onClick={onImageClick}
+                    className={`modal ${isActive ? "is-active" : ""} `}
+                >
+                    <div className="modal-background"></div>
+                    <div className="modal-content"></div>
+                    <button
+                        className="modal-close is-large"
+                        aria-label="close"
+                    ></button>
+                </div> */}
+            </div>
         </div>
     );
 }
