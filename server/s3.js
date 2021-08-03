@@ -12,7 +12,9 @@ function upload(request, response, next) {
     console.log("uploading s3", request.file);
     if (!request.file) {
         console.log("No req.file!");
-        return response.sendStatus(500);
+        // return response.sendStatus(500);
+        next();
+        return;
     }
     const { filename, mimetype, size, path } = request.file;
 
