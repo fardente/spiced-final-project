@@ -5,12 +5,11 @@ export default function RecipeItemsForm({ recipe_items, editMode }) {
     const [items, setItems] = useState([]);
     const [edit, setEditMode] = useState(false);
     const [formData, setFormData] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [itemsAdded, setItemsAdded] = useState(false);
 
     useEffect(() => {
         setItems(recipe_items);
-        console.log(recipe_items, "changed", {
-            ...recipe_items.filter(({ exists }) => !exists),
-        });
         const existing = Object.assign(
             {},
             ...recipe_items
@@ -20,7 +19,6 @@ export default function RecipeItemsForm({ recipe_items, editMode }) {
                 })
         );
         setFormData(existing);
-        console.log(existing);
     }, [recipe_items]);
 
     useEffect(() => {
@@ -36,9 +34,7 @@ export default function RecipeItemsForm({ recipe_items, editMode }) {
             });
         } else {
             const tempData = { ...formData };
-            console.log("tempdata", tempData);
             delete tempData[event.target.name];
-            console.log("after", tempData);
             setFormData(tempData);
         }
         console.log(formData);
@@ -46,40 +42,79 @@ export default function RecipeItemsForm({ recipe_items, editMode }) {
 
     async function handleSubmit(event) {
         event.preventDefault();
-        console.log(event.target);
-        console.log("f", formData);
+        setLoading(true);
         const result = await axios.post("/api/recipes/buy", formData);
         console.log(result);
         setFormData({});
+        setLoading(false);
+        setItemsAdded(true);
     }
 
     return (
-        <div>
-            RecipeItemsForm
-            <form
-                method="POST"
-                action="/api/recipes/buy"
-                onSubmit={(event) => handleSubmit(event)}
-            >
-                <ul>
-                    {items.map((item) => (
-                        <li key={item.id}>
-                            <input
-                                type="checkbox"
-                                id={item.id}
-                                name={item.item_name}
-                                value={item.id}
-                                onChange={(event) => onChange(event)}
-                                defaultChecked={!item.exists}
-                            ></input>
-                            <label htmlFor={item.id}>{item.item_name}</label>
-                            {edit && <button>remove</button>}{" "}
-                            {item.exists ? "Already on shopping list" : ""}
-                        </li>
-                    ))}
-                </ul>
-                <button type="submit">Add to shopping list</button>
-            </form>
+        <div className="box">
+            <div className="container has-text-centered  ">
+                <form
+                    method="POST"
+                    action="/api/recipes/buy"
+                    onSubmit={(event) => handleSubmit(event)}
+                >
+                    <h2 className="subtitle has-text-weight-semibold has-text-centered">
+                        Ingredients:
+                    </h2>
+
+                    <ul className="ingredients has-background-light">
+                        {items.map((item) => (
+                            <li key={item.id}>
+                                <div className="field is-grouped has-text-left">
+                                    <div className="control">
+                                        <label className="checkbox p-3">
+                                            <input
+                                                type="checkbox"
+                                                id={item.id}
+                                                name={item.item_name}
+                                                value={item.id}
+                                                onChange={(event) =>
+                                                    onChange(event)
+                                                }
+                                                defaultChecked={!item.exists}
+                                            ></input>
+                                        </label>
+                                        <label htmlFor={item.id}>
+                                            {item.item_name}
+                                        </label>
+                                        {/* {edit && (
+                                            <div className="control">
+                                                <a className="button is-danger is-light">
+                                                    {" "}
+                                                    <span className="icon is-small is-left">
+                                                        <ion-icon name="close-outline"></ion-icon>
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        )}{" "} */}
+                                        {item.exists ? "" : ""}
+                                    </div>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    <div className="field mt-3">
+                        <div className="control">
+                            <button className="button is-success" type="submit">
+                                <span>Add to shopping list</span>
+
+                                {itemsAdded ? (
+                                    <span className="icon is-small">
+                                        <ion-icon name="checkmark-outline"></ion-icon>
+                                    </span>
+                                ) : (
+                                    ""
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }
