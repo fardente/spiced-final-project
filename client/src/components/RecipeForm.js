@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Link, useHistory } from "react-router-dom";
 import StatusMessage from "./StatusMessage";
 import axios from "axios";
 
@@ -12,13 +13,17 @@ export default function RecipeForm() {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [currentIndex, setCurrentIndex] = useState("");
+    const [showResults, setShowResults] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const history = useHistory();
+    const file = useRef();
 
     useEffect(() => {
         if (searchTerm == "") {
             setSearchResults([]);
+            setShowResults(false);
             return;
         }
-        console.log("searching...", searchTerm);
         axios.get("/api/ingredients/search?q=" + searchTerm).then((result) => {
             setSearchResults(result.data);
         });
@@ -32,7 +37,7 @@ export default function RecipeForm() {
         console.log(ingredients);
     }
     const onChangeIngredients = (index) => (event) => {
-        console.log("event", event, "idx", index);
+        // console.log("event", event, "idx", index);
         let newIngrs = ingredients.map((ingr, idx) => {
             if (index !== idx) return ingr;
             return { ...ingr, name: event.target.value };
@@ -40,6 +45,7 @@ export default function RecipeForm() {
         setIngredients(newIngrs);
         setSearchTerm(event.target.value);
         setCurrentIndex(index);
+        setShowResults(true);
     };
 
     function onAdd(event) {
@@ -59,17 +65,44 @@ export default function RecipeForm() {
             setErrorMessage({ error: "Recipe name can't be empty!" });
             return;
         }
+        setLoading(true);
+        // {
+        //         ingredients: ingredients.filter((x) => x != ""),
+        //         ...recipe,
+        //         file: file.current.files[0],
+        //     }
+        const filtered = ingredients.filter((x) => x != "");
+        // console.log("filter", filtered);
+        const filterjson = JSON.stringify(filtered);
+        var formData = new FormData();
+        formData.append("ingredients", filterjson);
+        formData.append("recipe_name", recipe.recipe_name);
+        formData.append("recipe_preparation", recipe.recipe_preparation);
+        formData.append("file", file.current.files[0]);
         try {
-            const response = await axios.post("/api/recipes/add", {
-                ingredients: ingredients.filter((x) => x != ""),
-                ...recipe,
-            });
+            const response = await axios.post("/api/recipes/add", formData);
             console.log(response);
         } catch (error) {
             setErrorMessage({ error: error.response.data.error });
         }
+        setLoading(false);
         setRecipe({ recipe_name: "", recipe_preparation: "" });
         setIngredients([{ name: "" }]);
+        setShowResults(false);
+        history.push("/recipes");
+    }
+
+    function onClickResult(index, item_name) {
+        console.log("click", event.target, item_name);
+        let newIngrs = ingredients.map((ingr, idx) => {
+            if (index !== idx) return ingr;
+            return { ...ingr, name: item_name };
+        });
+        setIngredients(newIngrs);
+        setSearchTerm("");
+        // setCurrentIndex(index);
+        setShowResults(false);
+        console.log(ingredients);
     }
 
     function renderResults(index) {
@@ -77,7 +110,12 @@ export default function RecipeForm() {
             return searchResults.map((item) => {
                 return (
                     <div key={item.id} className="searchResult">
-                        <div className="itemInfo">{item.item_name}</div>
+                        <div
+                            onClick={() => onClickResult(index, item.item_name)}
+                            className="itemInfo"
+                        >
+                            {item.item_name}
+                        </div>
                     </div>
                 );
             });
@@ -85,56 +123,154 @@ export default function RecipeForm() {
     }
 
     return (
-        <div>
-            <h2>Add a recipe</h2>
-            <form onSubmit={(event) => onSubmit(event)}>
-                <div>
-                    <input
-                        type="text"
-                        name="recipe_name"
-                        placeholder="Recipe Name"
-                        onChange={(event) => onChange(event)}
-                        value={recipe.recipe_name}
-                        required
-                    ></input>
-                </div>
-                <div>
-                    Zutaten:
-                    {ingredients.map((item, index) => (
-                        <div key={index.toString()}>
-                            <input
-                                value={item.name}
-                                type="text"
-                                placeholder="New ingredient..."
-                                onChange={onChangeIngredients(index)}
-                            ></input>
-                            {renderResults(index)}
-                            <button
-                                name={index}
-                                onClick={(event) => onRemove(event, index)}
-                            >
-                                X
-                            </button>
-                        </div>
-                    ))}
-                    <button
-                        name="addIngredientBtn"
-                        onClick={(event) => onAdd(event)}
+        <div className="container">
+            <div className="columns is-centered">
+                <div className="column  is-half">
+                    <form
+                        action="/"
+                        method="POST"
+                        encType="multipart/form-data"
+                        onSubmit={(event) => onSubmit(event)}
                     >
-                        Add
-                    </button>
+                        <h2 className="title has-text-centered">
+                            Add a Recipe
+                        </h2>
+                        <div className="field">
+                            <div className="control">
+                                <input
+                                    className="input"
+                                    type="text"
+                                    name="recipe_name"
+                                    placeholder="Recipe Name"
+                                    onChange={(event) => onChange(event)}
+                                    value={recipe.recipe_name}
+                                    required
+                                ></input>
+                            </div>
+                        </div>
+                        <div className="field">
+                            <label className="label">Ingredients:</label>
+                            {ingredients.map((item, index) => (
+                                <div
+                                    className="field has-addons"
+                                    key={index.toString()}
+                                >
+                                    <div className="control">
+                                        <input
+                                            className="input"
+                                            value={item.name}
+                                            type="text"
+                                            placeholder="New ingredient..."
+                                            onChange={onChangeIngredients(
+                                                index
+                                            )}
+                                            // onBlur={() => {
+                                            //     console.log(
+                                            //         "Triggered because this input lost focus"
+                                            //     );
+                                            // }}
+                                        ></input>
+                                        {showResults && renderResults(index)}
+                                    </div>
+                                    <div className="control">
+                                        <a
+                                            name={index}
+                                            onClick={(event) =>
+                                                onRemove(event, index)
+                                            }
+                                            className="button is-danger is-light"
+                                        >
+                                            {" "}
+                                            <span className="icon is-small is-left">
+                                                <ion-icon name="close-outline"></ion-icon>
+                                            </span>
+                                        </a>
+                                    </div>
+                                </div>
+                            ))}
+                            <div className="control">
+                                <button
+                                    className="button is-success is-light is-outlined"
+                                    name="addIngredientBtn"
+                                    onClick={(event) => onAdd(event)}
+                                >
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="field">
+                            <div className="control">
+                                <textarea
+                                    className="textarea is-info"
+                                    value={recipe.recipe_preparation}
+                                    name="recipe_preparation"
+                                    onChange={(event) => onChange(event)}
+                                    placeholder="Add preparation steps here..."
+                                ></textarea>
+                            </div>
+                        </div>
+
+                        <div className="field">
+                            <label className="label">Add an image:</label>
+                            <div className="file is-info is-small">
+                                <label className="file-label">
+                                    <input
+                                        className="file-input"
+                                        type="file"
+                                        accept="image/*"
+                                        name="file"
+                                        id="file"
+                                        ref={file}
+                                    ></input>
+                                    <span className="file-cta">
+                                        <span className="file-icon">
+                                            <ion-icon name="cloud-upload-outline"></ion-icon>
+                                        </span>
+                                        <span className="file-label">
+                                            Choose a file…
+                                        </span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div className="field is-grouped is-grouped-right">
+                            <div className="control">
+                                <button
+                                    className={`button is-success ${
+                                        loading ? "is-loading" : ""
+                                    }`}
+                                    type="submit"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                            <div className="control">
+                                <Link className="button" to="/recipes">
+                                    Cancel
+                                </Link>
+                            </div>
+                        </div>
+
+                        {/*
+<div className="file">
+  <label className="file-label">
+    <input className="file-input" type="file" name="resume">
+    <span className="file-cta">
+      <span className="file-icon">
+        <i className="fas fa-upload"></i>
+      </span>
+      <span className="file-label">
+        Choose a file…
+      </span>
+    </span>
+  </label>
+</div>
+*/}
+                    </form>
                 </div>
-                <div>
-                    <textarea
-                        value={recipe.recipe_preparation}
-                        name="recipe_preparation"
-                        onChange={(event) => onChange(event)}
-                        placeholder="Add preparation steps here..."
-                    ></textarea>
-                    <button type="submit">submit</button>
-                </div>
-                <button type="reset">reset</button>
-            </form>
+            </div>
             <StatusMessage message={errorMessage} />
         </div>
     );
