@@ -8,26 +8,22 @@ import IngredientManager from "./components/IngredientManager";
 
 export default function App() {
     return (
-        <div>
-            <h1>Recipe Manager 0.0.1</h1>
-            <BrowserRouter>
-                <section className="app">
-                    <header>
-                        <Nav />
-                    </header>
-                    <Route exact path="/" component={ShoppingList} />
-                    <Route exact path="/recipes" component={RecipeList} />
-                    <Route
-                        exact
-                        path="/ingredients"
-                        component={IngredientManager}
-                    />
-                    <Switch>
-                        <Route path="/recipes/add" component={RecipeForm} />
-                        <Route path="/recipes/:id" component={RecipeDetails} />
-                    </Switch>
-                </section>
-            </BrowserRouter>
-        </div>
+        <BrowserRouter>
+            <Nav />
+
+            <section className="section p-5 ">
+                <Route exact path="/" component={ShoppingList} />
+                <Route exact path="/recipes" component={RecipeList} />
+                <Route
+                    exact
+                    path="/ingredients"
+                    component={IngredientManager}
+                />
+                <Switch>
+                    <Route path="/recipes/add" component={RecipeForm} />
+                    <Route path="/recipes/:id" component={RecipeDetails} />
+                </Switch>
+            </section>
+        </BrowserRouter>
     );
 }
