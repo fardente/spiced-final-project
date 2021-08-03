@@ -1,0 +1,56 @@
+body {
+    font-size: large;
+}
+
+.preparation {
+    white-space: pre-wrap;
+}
+
+.fimage img {
+    /* max-width: 100%;
+    width: auto;
+    max-height: 250px; */
+    object-fit: cover;
+    width: 300px;
+    height: 250px;
+}
+
+.media-content {
+    overflow-x: visible;
+}
+
+.ingredients {
+    overflow-x: scroll;
+}
+
+.searchResult {
+    background-color: white;
+}
+
+.itemInfo:hover {
+    background-color: #8ee4af;
+    cursor: pointer;
+}
+.searchbox {
+    display: flex;
+    justify-content: center;
+}
+
+.front {
+    z-index: 1000;
+}
+
+.inputGroup {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    width: 100%;
+}
+.inputBoxRow {
+    padding-bottom: 0px;
+    position: fixed;
+    bottom: 0px;
+    left: 0;
+    right: 0px;
+}

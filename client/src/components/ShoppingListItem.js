@@ -5,17 +5,43 @@ export default function ShoppingListItem({
     onDelete,
     onCheck,
 }) {
+    /*
+      <button class="button">
+    <span class="icon is-small">
+      <i class="fas fa-bold"></i>
+    </span>
+  </button>
+    */
     return (
-        <div>
-            <div>
-                <button onClick={() => onDelete(id)}>Delete</button>
+        <div className="columns is-mobile">
+            <div className="column">
+                <button
+                    className="button is-outlined is-danger is-light"
+                    onClick={() => onDelete(id)}
+                >
+                    {" "}
+                    <span className="icon is-small">
+                        <ion-icon name="trash-outline"></ion-icon>
+                    </span>
+                </button>
             </div>
-            <div>
-                {item_name} {id}
-            </div>
-            <div>
-                <button onClick={() => onCheck(id, !checked)}>
-                    Check {checked ? "true" : "false"}
+            <div className="column is-capitalized">{item_name}</div>
+            <div className="column">
+                <button
+                    className={`button ${
+                        checked
+                            ? "is-success"
+                            : "is-outlined is-success is-light"
+                    }`}
+                    onClick={() => onCheck(id, !checked)}
+                >
+                    <span className="icon is-small">
+                        {checked ? (
+                            <ion-icon name="checkmark-done-outline"></ion-icon>
+                        ) : (
+                            <ion-icon name="checkmark-outline"></ion-icon>
+                        )}
+                    </span>
                 </button>
             </div>
         </div>
