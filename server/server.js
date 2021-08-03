@@ -33,6 +33,7 @@ app.post(
     upload,
     async (req, res) => {
         //addRecipe -> get recipe_id
+        console.log("server adding recipe", req.body, "req.file", req.file);
         const recipe_id = await db.addRecipe(req.body);
         //addIngredients -> get [item_ids]
         const ingredients = JSON.parse(req.body.ingredients);
@@ -47,10 +48,13 @@ app.post(
         const recipeItems = { recipe_id, ingredient_ids };
         const recipeItemsResult = await db.addRecipeIngredients(recipeItems);
         // add image
-        req.body.url = awsBucketUrl + req.file.filename;
         if (req.file) {
-            await db.updateImage(recipe_id, req.body.url);
+            req.body.url = awsBucketUrl + req.file.filename;
+            if (req.file) {
+                await db.updateImage(recipe_id, req.body.url);
+            }
         }
+
         res.json(recipeItemsResult);
     }
 );
@@ -86,6 +90,12 @@ app.post("/api/recipes/buy", async (req, res) => {
     res.json(await db.addShoppingItems(req.body));
 });
 
+// Delete a recipe
+app.post("/api/recipes/delete", async (req, res) => {
+    console.log("Server deleting item", req.body);
+    res.json(await db.deleteRecipe(req.body));
+});
+
 // Get all shopping items
 app.get("/api/shopping/items", async (req, res) => {
     console.log("getting shopping items");
@@ -94,8 +104,11 @@ app.get("/api/shopping/items", async (req, res) => {
 
 // Add a shopping item
 app.post("/api/shopping/add", async (req, res) => {
-    console.log("server adding shopping item");
-    res.json(await db.addShoppingItem(req.body));
+    console.log("server adding shopping item", req.body);
+    const newItem = await db.addNewShoppingItem(req.body);
+    const item_name = req.body.newItem;
+    console.log("new", { ...newItem, item_name });
+    res.json({ ...newItem, item_name });
 });
 
 // Checkmark a shopping item
