@@ -226,6 +226,54 @@ async function addRecipeIngredients({ recipe_id, ingredient_ids }) {
     return result;
 }
 
+async function deleteRecipeIngredient(recipe_id, item_id) {
+    console.log("db deleteRecipeIngredient", recipe_id, item_id);
+    try {
+        const { rows } = await db.query(
+            `DELETE FROM recipe_items
+            WHERE recipe_id = $1 AND item_it = $2
+            RETURNING *`,
+            [recipe_id, item_id]
+        );
+        return rows[0];
+    } catch (error) {
+        console.error("db deleteRecipeIngredient", recipe_id, item_id, error);
+    }
+}
+
+async function deleteRecipeIngredients({ recipe_id, ingredient_ids }) {
+    let result = [];
+    for (const item_id of ingredient_ids) {
+        try {
+            const id = await deleteRecipeIngredient(recipe_id, item_id);
+            result.push(id);
+        } catch (error) {
+            console.error(
+                "db deleteRecipeIngredients",
+                recipe_id,
+                item_id,
+                error
+            );
+        }
+    }
+    return result;
+}
+
+async function deleteAllRecipeIngredients(recipe_id) {
+    console.log("db deleteAllRecipeIngredients", recipe_id);
+    try {
+        const { rows } = await db.query(
+            `
+        DELETE FROM recipe_items
+        WHERE recipe_id = $1`,
+            [recipe_id]
+        );
+        return rows;
+    } catch (error) {
+        console.error("db deleteAllRecipeIngredients", recipe_id, error);
+    }
+}
+
 async function addIngredient(name) {
     if (name == "") return;
     try {
@@ -328,5 +376,8 @@ module.exports = {
     addIngredient,
     addRecipeIngredients,
     addRecipeIngredient,
+    deleteRecipeIngredient,
+    deleteRecipeIngredients,
+    deleteAllRecipeIngredients,
     getIngredientIdByName,
 };
