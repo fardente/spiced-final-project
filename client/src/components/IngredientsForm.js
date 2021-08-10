@@ -10,6 +10,21 @@ export default function IngredientsForm({
     const [showResults, setShowResults] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
+    const [formData, setFormData] = useState({});
+    const [loading, setLoading] = useState(false);
+    const [itemsAdded, setItemsAdded] = useState(false);
+
+    useEffect(() => {
+        const existing = Object.assign(
+            {},
+            ...ingredients
+                .filter(({ exists }) => !exists)
+                .map((item) => {
+                    return { [item.item_name]: item.id };
+                })
+        );
+        setFormData(existing);
+    }, [ingredients]);
 
     useEffect(() => {
         if (searchTerm == "") {
@@ -34,6 +49,21 @@ export default function IngredientsForm({
         setCurrentIndex(index);
         setShowResults(true);
     };
+
+    function onChangeCheckbox(event) {
+        console.log("changevent", event.target.checked);
+        if (event.target.checked) {
+            setFormData({
+                ...formData,
+                [event.target.name]: event.target.value,
+            });
+        } else {
+            const tempData = { ...formData };
+            delete tempData[event.target.name];
+            setFormData(tempData);
+        }
+        console.log(formData);
+    }
 
     function onAdd(event) {
         event.preventDefault();
@@ -74,6 +104,16 @@ export default function IngredientsForm({
                 );
             });
         }
+    }
+
+    async function handleSubmit(event) {
+        event.preventDefault();
+        setLoading(true);
+        const result = await axios.post("/api/recipes/buy", formData);
+        console.log(result);
+        setFormData({});
+        setLoading(false);
+        setItemsAdded(true);
     }
 
     function renderEdit() {
@@ -126,25 +166,32 @@ export default function IngredientsForm({
 
     function renderNormal() {
         return (
-            <ul className="ingredients has-background-light">
-                {ingredients.map((item, index) => (
-                    <li key={index.toString()}>
-                        <div className="field is-grouped has-text-left">
-                            <div className="control">
-                                <label className="checkbox p-3">
-                                    <input
-                                        type="checkbox"
-                                        id={item.id}
-                                        name={item.item_name}
-                                        value={item.id}
-                                        onChange={(event) => onChange(event)}
-                                        defaultChecked={!item.exists}
-                                    ></input>
-                                </label>
-                                <label htmlFor={item.id}>
-                                    {item.item_name}
-                                </label>
-                                {/* {edit && (
+            <form
+                method="POST"
+                action="/api/recipes/buy"
+                onSubmit={(event) => handleSubmit(event)}
+            >
+                <ul className="ingredients has-background-light">
+                    {ingredients.map((item, index) => (
+                        <li key={index.toString()}>
+                            <div className="field is-grouped has-text-left">
+                                <div className="control">
+                                    <label className="checkbox p-3">
+                                        <input
+                                            type="checkbox"
+                                            id={item.id}
+                                            name={item.item_name}
+                                            value={item.id}
+                                            onChange={(event) =>
+                                                onChangeCheckbox(event)
+                                            }
+                                            defaultChecked={!item.exists}
+                                        ></input>
+                                    </label>
+                                    <label htmlFor={item.id}>
+                                        {item.item_name}
+                                    </label>
+                                    {/* {edit && (
                                             <div className="control">
                                                 <a className="button is-danger is-light">
                                                     {" "}
@@ -154,12 +201,28 @@ export default function IngredientsForm({
                                                 </a>
                                             </div>
                                         )}{" "} */}
-                                {item.exists ? "" : ""}
+                                    {item.exists ? "" : ""}
+                                </div>
                             </div>
-                        </div>
-                    </li>
-                ))}
-            </ul>
+                        </li>
+                    ))}
+                </ul>
+                <div className="field mt-3">
+                    <div className="control">
+                        <button className="button is-success" type="submit">
+                            <span>Add to shopping list</span>
+
+                            {itemsAdded ? (
+                                <span className="icon is-small">
+                                    <ion-icon name="checkmark-outline"></ion-icon>
+                                </span>
+                            ) : (
+                                ""
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </form>
         );
     }
 
