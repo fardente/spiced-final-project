@@ -9,7 +9,7 @@ export default function RecipeForm() {
         recipe_name: "",
         recipe_preparation: "",
     });
-    const [ingredients, setIngredients] = useState([{ name: "" }]);
+    const [ingredients, setIngredients] = useState([{ item_name: "" }]);
     const [errorMessage, setErrorMessage] = useState("");
     // const [searchTerm, setSearchTerm] = useState("");
     // const [searchResults, setSearchResults] = useState([]);
@@ -57,7 +57,7 @@ export default function RecipeForm() {
         }
         setLoading(false);
         setRecipe({ recipe_name: "", recipe_preparation: "" });
-        setIngredients([{ name: "" }]);
+        setIngredients([{ item_name: "" }]);
         // setShowResults(false);
         history.push("/recipes");
     }
