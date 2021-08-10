@@ -53,6 +53,9 @@ export default function RecipeDetails() {
     }
 
     async function deleteRecipe() {
+        if (!confirm("Delete recipe " + recipe.recipe_name + "?")) {
+            return;
+        }
         try {
             await axios.post("/api/recipes/delete", { id: params.id });
             history.push("/recipes");
