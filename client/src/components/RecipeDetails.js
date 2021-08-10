@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import axios from "axios";
 import RecipeItemsForm from "./RecipeItemsForm";
+import IngredientsForm from "./IngredientsForm";
 // import Markdown from "./Markdown";
 
 export default function RecipeDetails() {
     const params = useParams();
     const [recipe, setRecipe] = useState({});
-    const [recipeItems, setRecipeItems] = useState([]);
+    const [ingredients, setIngredients] = useState([]);
     const [editMode, setEditMode] = useState(false);
     const history = useHistory();
     // const [isActive, setIsActive] = useState(false);
@@ -19,6 +20,7 @@ export default function RecipeDetails() {
             console.log("no recipes");
             return;
         }
+        console.log("received recipe", data[0]);
         setRecipe(data[0]);
 
         ({ data } = await axios.get("/api/recipes/" + id + "/items"));
@@ -26,14 +28,16 @@ export default function RecipeDetails() {
             console.log("no recipe items");
             return;
         }
-        setRecipeItems(data);
+        console.log("Data", data);
+        setIngredients(data);
         console.log(data);
     }, []);
 
     async function toggleEditMode() {
         if (editMode) {
             try {
-                await axios.put("/api/recipes", { ...recipe });
+                await axios.put("/api/recipes", { ...recipe, ingredients });
+                console.log("ings to send", ingredients);
             } catch (error) {
                 console.error("error updating recipe", error);
             }
@@ -97,8 +101,13 @@ export default function RecipeDetails() {
                 {/* <img src={recipe.image_url} onClick={onImageClick}></img> */}
                 <div className="columns">
                     <div className="column">
-                        <RecipeItemsForm
+                        {/* <RecipeItemsForm
                             recipe_items={recipeItems}
+                            editMode={editMode}
+                        /> */}
+                        <IngredientsForm
+                            ingredients={ingredients}
+                            setIngredients={setIngredients}
                             editMode={editMode}
                         />
                     </div>
