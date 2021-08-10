@@ -23,10 +23,11 @@ export default function IngredientsForm({
     }, [searchTerm]);
 
     const onChangeIngredients = (index) => (event) => {
-        // console.log("event", event, "idx", index);
+        console.log("event", event, "idx", index);
+        console.log("ingredients");
         let newIngrs = ingredients.map((ingr, idx) => {
             if (index !== idx) return ingr;
-            return { ...ingr, name: event.target.value };
+            return { ...ingr, item_name: event.target.value };
         });
         setIngredients(newIngrs);
         setSearchTerm(event.target.value);
@@ -36,7 +37,7 @@ export default function IngredientsForm({
 
     function onAdd(event) {
         event.preventDefault();
-        setIngredients([...ingredients, { name: "" }]);
+        setIngredients([...ingredients, { item_name: "" }]);
     }
 
     function onRemove(event, index) {
@@ -49,7 +50,7 @@ export default function IngredientsForm({
         console.log("click", event.target, item_name);
         let newIngrs = ingredients.map((ingr, idx) => {
             if (index !== idx) return ingr;
-            return { ...ingr, name: item_name };
+            return { ...ingr, item_name: item_name };
         });
         setIngredients(newIngrs);
         setSearchTerm("");
@@ -84,7 +85,7 @@ export default function IngredientsForm({
                         <div className="control">
                             <input
                                 className="input"
-                                value={item.name}
+                                value={item.item_name}
                                 type="text"
                                 placeholder="New ingredient..."
                                 onChange={onChangeIngredients(index)}
@@ -123,5 +124,44 @@ export default function IngredientsForm({
         );
     }
 
-    return <div>{editMode && renderEdit()}</div>;
+    function renderNormal() {
+        return (
+            <ul className="ingredients has-background-light">
+                {ingredients.map((item, index) => (
+                    <li key={index.toString()}>
+                        <div className="field is-grouped has-text-left">
+                            <div className="control">
+                                <label className="checkbox p-3">
+                                    <input
+                                        type="checkbox"
+                                        id={item.id}
+                                        name={item.item_name}
+                                        value={item.id}
+                                        onChange={(event) => onChange(event)}
+                                        defaultChecked={!item.exists}
+                                    ></input>
+                                </label>
+                                <label htmlFor={item.id}>
+                                    {item.item_name}
+                                </label>
+                                {/* {edit && (
+                                            <div className="control">
+                                                <a className="button is-danger is-light">
+                                                    {" "}
+                                                    <span className="icon is-small is-left">
+                                                        <ion-icon name="close-outline"></ion-icon>
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        )}{" "} */}
+                                {item.exists ? "" : ""}
+                            </div>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        );
+    }
+
+    return <div>{editMode ? renderEdit() : renderNormal()}</div>;
 }
