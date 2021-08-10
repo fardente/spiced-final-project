@@ -162,14 +162,35 @@ async function addRecipe({ recipe_name, recipe_preparation }) {
     }
 }
 
-async function updateRecipe({ recipe_name, recipe_preparation, id }) {
+async function updateRecipe({
+    recipe_name,
+    recipe_preparation,
+    id: recipe_id,
+    ingredients,
+}) {
+    console.log(
+        "db updateRecipe",
+        recipe_name,
+        recipe_preparation,
+        recipe_id,
+        ingredients
+    );
+    try {
+        const deleted = await deleteAllRecipeIngredients(recipe_id);
+        console.log("deleted", deleted);
+        const ingredient_ids = await addIngredients(ingredients);
+        const recipeItems = { recipe_id, ingredient_ids };
+        const inserted = await addRecipeIngredients(recipeItems);
+    } catch (error) {
+        console.error("db updateRecipe", recipe_id, ingredients, error);
+    }
     try {
         const { rows } = await db.query(
             `UPDATE recipes
             SET recipe_name = $1, recipe_preparation = $2
             WHERE id = $3
             RETURNING *`,
-            [recipe_name, recipe_preparation, id]
+            [recipe_name, recipe_preparation, recipe_id]
         );
         return rows;
     } catch (error) {
@@ -265,7 +286,8 @@ async function deleteAllRecipeIngredients(recipe_id) {
         const { rows } = await db.query(
             `
         DELETE FROM recipe_items
-        WHERE recipe_id = $1`,
+        WHERE recipe_id = $1
+        RETURNING *`,
             [recipe_id]
         );
         return rows;
@@ -306,9 +328,9 @@ async function addIngredient(name) {
 async function addIngredients(ingredients) {
     let ids = [];
     for (const item of ingredients) {
-        if (item.name == "") continue;
+        if (item.item_name == "") continue;
         try {
-            const result = await addIngredient(item.name);
+            const result = await addIngredient(item.item_name);
             ids.push(result);
         } catch (error) {
             console.error("db addIngredients", item, error);
