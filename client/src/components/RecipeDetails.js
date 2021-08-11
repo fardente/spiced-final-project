@@ -82,7 +82,7 @@ export default function RecipeDetails() {
     return (
         <div className="container has-text-centered">
             <section
-                className=" hero is-medium is-info"
+                className="hero is-medium is-info is-relative"
                 style={{
                     backgroundImage:
                         "linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.5)), url(" +
@@ -91,19 +91,62 @@ export default function RecipeDetails() {
                     backgroundPosition: "center",
                     backgroundSize: "cover",
                     backgroundRepeat: "no-repeat",
+                    paddingBottom: "20px",
                 }}
             >
                 <div className="hero-body">
                     <p className="title">
                         {editMode ? editRender : recipe.recipe_name}
                     </p>
+                    <div className="field is-grouped is-grouped-right edit-recipe-div">
+                        <div className="recipe-file-button">
+                            <div className="file">
+                                <label className="file-label">
+                                    <input
+                                        className="file-input"
+                                        type="file"
+                                        name="newRecipeImage"
+                                        onChange={(event) => changeImage(event)}
+                                    />
+                                    <span className="icon is-large">
+                                        <ion-icon name="camera-outline"></ion-icon>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button
+                            className="recipe-button"
+                            onClick={toggleEditMode}
+                        >
+                            {editMode ? (
+                                <span className="icon is-large">
+                                    <ion-icon name="save-outline"></ion-icon>
+                                </span>
+                            ) : (
+                                <span className="icon is-large">
+                                    <ion-icon name="create-outline"></ion-icon>
+                                </span>
+                            )}
+                        </button>
+                        {editMode && (
+                            <button
+                                className="recipe-button"
+                                onClick={deleteRecipe}
+                            >
+                                <span className="icon is-large">
+                                    <ion-icon name="trash-outline"></ion-icon>
+                                </span>
+                            </button>
+                        )}
+                    </div>
                 </div>
             </section>
 
             <div className="container mt-5">
                 {/* <img src={recipe.image_url} onClick={onImageClick}></img> */}
                 <div className="columns">
-                    <div className="column">
+                    <div className="column is-one-third">
                         {/* <RecipeItemsForm
                             recipe_items={recipeItems}
                             editMode={editMode}
@@ -132,7 +175,7 @@ export default function RecipeDetails() {
                         )}
                     </div>
 
-                    <div className="column">
+                    {/* <div className="column">
                         <div className="field is-grouped is-grouped-right">
                             <div className="control">
                                 <button
@@ -151,7 +194,7 @@ export default function RecipeDetails() {
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* <Markdown></Markdown> */}
