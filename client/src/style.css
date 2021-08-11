@@ -54,3 +54,48 @@ body {
     left: 0;
     right: 0px;
 }
+
+.edit-recipe-div {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+}
+
+.change-image-div {
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
+}
+
+.change-image-label {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    font-size: 2rem;
+    padding: 2px;
+    margin: 2px;
+    height: 100%;
+}
+
+.recipe-button {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 2px;
+    color: white;
+    font-size: 2rem;
+    padding: 1px 5px;
+    /* margin: 2px; */
+    margin-right: 2px;
+}
+
+.recipe-file-button {
+    background-color: rgba(0, 0, 0, 0.5);
+    border: none;
+    border-radius: 2px;
+    color: white;
+    font-size: 2rem;
+    padding: 5px;
+    /* margin: 2px; */
+    margin-right: 2px;
+    height: 100%;
+}
