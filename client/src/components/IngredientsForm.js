@@ -119,7 +119,6 @@ export default function IngredientsForm({
     function renderEdit() {
         return (
             <div className="field">
-                <label className="label">Ingredients:</label>
                 {ingredients.map((item, index) => (
                     <div className="field has-addons" key={index.toString()}>
                         <div className="control">
@@ -226,5 +225,14 @@ export default function IngredientsForm({
         );
     }
 
-    return <div>{editMode ? renderEdit() : renderNormal()}</div>;
+    return (
+        <div className="box">
+            <div className="container has-text-centered  ">
+                <h2 className="subtitle has-text-weight-semibold has-text-centered">
+                    Ingredients:
+                </h2>
+                {editMode ? renderEdit() : renderNormal()}{" "}
+            </div>
+        </div>
+    );
 }
