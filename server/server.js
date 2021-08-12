@@ -60,21 +60,32 @@ app.post(
 );
 
 // Update image
-app.post("/api/upload", uploader.single("file"), upload, async (req, res) => {
-    req.body.url = awsBucketUrl + req.file.filename;
-    if (req.file) {
-        let result = await db.updateImage(req.body.recipe_id, req.body.url);
-        res.json(result);
-    } else {
-        res.json({
-            success: false,
-        });
+app.put(
+    "/api/recipes/:id/image",
+    uploader.single("file"),
+    upload,
+    async (req, res) => {
+        req.body.url = awsBucketUrl + req.file.filename;
+        if (req.file) {
+            let result = await db.updateImage(req.params.id, req.body.url);
+            console.log("server updateimage result", result);
+            if (result) {
+                res.json(result);
+            } else {
+                res.statusCode = 500;
+                res.json();
+            }
+        } else {
+            res.json({
+                success: false,
+            });
+        }
     }
-});
+);
 
 // Update a recipe
 app.put("/api/recipes", async (req, res) => {
-    console.log("server updateing recipe", req.params.id);
+    console.log("server updateing recipe", req.body.id);
     res.json(await db.updateRecipe(req.body));
 });
 
