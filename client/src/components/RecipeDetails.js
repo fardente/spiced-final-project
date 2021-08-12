@@ -52,6 +52,25 @@ export default function RecipeDetails() {
         });
     }
 
+    async function changeImage(event) {
+        console.log("new image", event.target.files[0]);
+        const formData = new FormData();
+        formData.append("file", event.target.files[0]);
+        try {
+            const response = await axios.put(
+                "/api/recipes/" + params.id + "/image",
+                formData
+            );
+            console.log(response);
+            setRecipe({
+                ...recipe,
+                image_url: response.data,
+            });
+        } catch (error) {
+            console.log("error changing image");
+        }
+    }
+
     async function deleteRecipe() {
         if (!confirm("Delete recipe " + recipe.recipe_name + "?")) {
             return;
