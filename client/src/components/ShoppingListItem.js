@@ -14,7 +14,7 @@ export default function ShoppingListItem({
     */
     return (
         <div className="columns is-mobile">
-            <div className="column">
+            <div className="column is-flex-grow-0">
                 <button
                     className="button is-outlined is-danger is-light"
                     onClick={() => onDelete(id)}
@@ -26,7 +26,7 @@ export default function ShoppingListItem({
                 </button>
             </div>
             <div className="column is-capitalized">{item_name}</div>
-            <div className="column">
+            <div className="column is-flex-grow-0">
                 <button
                     className={`button ${
                         checked
