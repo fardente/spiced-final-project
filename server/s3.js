@@ -1,11 +1,13 @@
 const aws = require("aws-sdk");
 const fs = require("fs");
 
-const secrets = require("./secrets");
+const AWS_KEY = process.env.AWS_KEY || require("./secrets").AWS_KEY;
+
+const AWS_SECRET = process.env.AWS_SECRET || require("./secrets").AWS_SECRET;
 
 const s3 = new aws.S3({
-    accessKeyId: secrets.AWS_KEY,
-    secretAccessKey: secrets.AWS_SECRET,
+    accessKeyId: AWS_KEY,
+    secretAccessKey: AWS_SECRET,
 });
 
 function upload(request, response, next) {
