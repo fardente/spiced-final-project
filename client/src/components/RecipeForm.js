@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Link, useHistory } from "react-router-dom";
-import StatusMessage from "./StatusMessage";
+// import StatusMessage from "./StatusMessage";
 import axios from "axios";
 import IngredientsForm from "./IngredientsForm";
 

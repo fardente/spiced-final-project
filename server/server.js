@@ -6,7 +6,7 @@ const { upload } = require("./s3");
 
 const app = express();
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 const awsBucketUrl = "https://nandoseimer.s3.amazonaws.com/";
 
 app.use(express.json());
@@ -132,6 +132,17 @@ app.put("/api/shopping/check", async (req, res) => {
 app.post("/api/shopping/delete", async (req, res) => {
     console.log("Server deleting item", req.body);
     res.json(await db.deleteShoppingItem(req.body));
+});
+
+// Search shopping items
+app.get("/api/shopping/search", async (req, res) => {
+    console.log(req.query.q);
+    try {
+        res.json(await db.searchShoppingItems(req.query.q));
+    } catch (error) {
+        res.status(500);
+        res.json({ ...error });
+    }
 });
 
 // Get ingredients

@@ -1,6 +1,6 @@
 {
     "name": "RecipeManager",
-    "version": "0.0.1",
+    "version": "0.5.0",
     "description": "",
     "main": "server/server.js",
     "scripts": {
