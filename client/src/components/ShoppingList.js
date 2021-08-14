@@ -15,17 +15,14 @@ export default function ShoppingList() {
 
     useEffect(async () => {
         const { data } = await axios.get("/api/shopping/items");
-        console.log("items", data);
         setItemData(data);
     }, []);
 
     useEffect(() => {
-        console.log("useeffect setrenderitems", itemData);
         setRenderItems(itemData);
     }, [itemData]);
 
     useEffect(() => {
-        console.log("useeffect filterTerm", filterTerm);
         const res = itemData.filter(
             (x) =>
                 x.item_name.toLowerCase().indexOf(filterTerm.toLowerCase()) !=
@@ -36,7 +33,6 @@ export default function ShoppingList() {
 
     useEffect(async () => {
         setShowResults(false);
-        console.log("useeffect searchterm", searchTerm);
         if (searchTerm == "") {
             setSearchResults([]);
             setShowResults(false);
@@ -51,7 +47,6 @@ export default function ShoppingList() {
 
     useEffect(() => {
         if (addItem) {
-            console.log("useeffect add", newItem);
             onAdd();
         }
     }, [addItem]);
@@ -86,11 +81,9 @@ export default function ShoppingList() {
         if (newItem == "") return;
         try {
             const { data } = await axios.post("/api/shopping/add", { newItem });
-            console.log(data);
             if (data.error) {
                 console.log(data.error);
             } else {
-                console.log("items updated", data, itemData);
                 setItemData([data, ...itemData]);
             }
         } catch (error) {
@@ -114,9 +107,7 @@ export default function ShoppingList() {
     // }
 
     function onChange(event) {
-        console.log("renderREsults onchange", showResults);
         setShowResults(false);
-        console.log("renderREsults onchange", showResults);
         setNewItem(event.target.value);
         setSearchTerm(event.target.value);
         setFilterTerm(event.target.value);
@@ -139,9 +130,7 @@ export default function ShoppingList() {
     }
 
     function renderResults() {
-        console.log("renderResults", showResults);
         return searchResults.map((item) => {
-            console.log("redneritem", item.item_name);
             if (checkExists(item.item_name)) return;
             return (
                 <div key={item.id} className="shopping-search-result">
