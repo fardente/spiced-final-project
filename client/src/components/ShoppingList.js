@@ -100,9 +100,9 @@ export default function ShoppingList() {
         }
     }
 
-    function onFilter(event) {
-        setFilterTerm(event.target.value);
-    }
+    // function onFilter(event) {
+    //     setFilterTerm(event.target.value);
+    // }
 
     function onChange(event) {
         console.log("renderREsults onchange", showResults);
@@ -166,7 +166,7 @@ export default function ShoppingList() {
     return (
         <div className="container has-text-centered shopping-container">
             <h2 className="title">Shopping List</h2>
-            <div className="container searchbox">
+            {/* <div className="container searchbox">
                 <div className="control has-icons-left">
                     <input
                         className="input"
@@ -192,7 +192,7 @@ export default function ShoppingList() {
                         </span>
                     </a>
                 </div>
-            </div>
+            </div> */}
             <div className="columns is-centered shopping-items">
                 <div className="column is-half">
                     <div className="container">
