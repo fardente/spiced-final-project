@@ -368,7 +368,7 @@ async function getIngredients() {
 async function getIngredientIdByName(name) {
     try {
         const { rows } = await db.query(
-            `SELECT id FROM items WHERE item_name = $1`,
+            `SELECT id FROM items WHERE UPPER(item_name) = UPPER($1)`,
             [name]
         );
         console.log("db getIngredientIdByName rows for", name, rows);
