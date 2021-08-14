@@ -11,6 +11,7 @@ export default function ShoppingList() {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
+    const [addItem, setAddItem] = useState(false);
 
     useEffect(async () => {
         const { data } = await axios.get("/api/shopping/items");
@@ -47,6 +48,13 @@ export default function ShoppingList() {
         setSearchResults(result.data);
         setShowResults(true);
     }, [searchTerm]);
+
+    useEffect(() => {
+        if (addItem) {
+            console.log("useeffect add", newItem);
+            onAdd();
+        }
+    }, [addItem]);
 
     async function onDelete(id) {
         try {
@@ -91,6 +99,7 @@ export default function ShoppingList() {
         setNewItem("");
         setFilterTerm("");
         setSearchTerm("");
+        setAddItem(false);
     }
 
     function checkKey(event) {
@@ -124,18 +133,9 @@ export default function ShoppingList() {
     }
 
     function onClickResult(item_name) {
-        console.log("click", event.target, item_name);
-        // let newIngrs = ingredients.map((ingr, idx) => {
-        //     if (index !== idx) return ingr;
-        //     return { ...ingr, item_name: item_name };
-        // });
-        // setIngredients(newIngrs);
-        // setSearchTerm("");
-        // // setCurrentIndex(index);
-        // setShowResults(false);
-        // console.log(ingredients);
         setNewItem(item_name);
         setShowResults(false);
+        setAddItem(true);
     }
 
     function renderResults() {
