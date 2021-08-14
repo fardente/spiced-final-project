@@ -8,6 +8,12 @@ if (process.env.DATABASE_URL) {
     db = pg(`postgres:${dbUser}:${dbPass}@localhost:5432/recipemanager`);
 }
 
+function stringHelper(string) {
+    string = string.trim();
+    string = string.charAt(0).toUpperCase() + string.slice(1);
+    return string;
+}
+
 async function getShoppingItems() {
     try {
         const { rows } = await db.query(
@@ -25,6 +31,7 @@ async function getShoppingItems() {
 }
 
 async function addNewShoppingItem({ newItem }) {
+    newItem = stringHelper(newItem);
     try {
         console.log("db addnews", newItem);
         const id = await addIngredient(newItem);
@@ -149,6 +156,7 @@ async function getRecipeItems(recipe_id) {
 
 async function addRecipe({ recipe_name, recipe_preparation }) {
     console.log("DB addRecipe adding", recipe_name, recipe_preparation);
+    recipe_name = stringHelper(recipe_name);
     try {
         const { rows } = await db.query(
             `INSERT INTO recipes (recipe_name, recipe_preparation)
@@ -175,12 +183,14 @@ async function updateRecipe({
         recipe_id,
         ingredients
     );
+    recipe_name = stringHelper(recipe_name);
     try {
         const deleted = await deleteAllRecipeIngredients(recipe_id);
         console.log("deleted", deleted);
         const ingredient_ids = await addIngredients(ingredients);
         const recipeItems = { recipe_id, ingredient_ids };
         const inserted = await addRecipeIngredients(recipeItems);
+        console.log("db updateRecipe inserted:", inserted);
     } catch (error) {
         console.error("db updateRecipe", recipe_id, ingredients, error);
     }
@@ -212,11 +222,15 @@ async function deleteRecipe({ id }) {
 }
 
 async function updateImage(id, image_url) {
-    const result = await db.query(
+    const { rows } = await db.query(
         "UPDATE recipes SET image_url = $2 WHERE id = $1 RETURNING *",
         [id, image_url]
     );
-    return result.rows[0].iamge_url;
+    if (rows.length > 0) {
+        console.log("db updateImage", rows);
+        return rows[0].image_url;
+    }
+    return null;
 }
 
 async function addRecipeIngredient(recipe_id, item_id) {
@@ -298,6 +312,7 @@ async function deleteAllRecipeIngredients(recipe_id) {
 
 async function addIngredient(name) {
     if (name == "") return;
+    name = stringHelper(name);
     try {
         let result = await getIngredientIdByName(name);
         console.log(
