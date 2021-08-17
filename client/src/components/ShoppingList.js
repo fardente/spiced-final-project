@@ -212,11 +212,11 @@ export default function ShoppingList() {
                 <div className="inputGroup control">
                     <button
                         onClick={() => onClearInput()}
-                        className="button is-medium is-danger"
+                        className="button is-medium"
                     >
                         <span className="icon is-large">
                             <ion-icon
-                                name="remove-outline"
+                                name="close-outline"
                                 className="is-large"
                             ></ion-icon>
                         </span>
