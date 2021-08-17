@@ -62,5 +62,8 @@
     },
     "keywords": [],
     "author": "Fernando Ardente",
-    "license": "ISC"
+    "license": "ISC",
+    "devDependencies": {
+        "workbox-webpack-plugin": "^6.2.4"
+    }
 }

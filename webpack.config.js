@@ -1,6 +1,7 @@
 const path = require("path");
 
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const WorkboxPlugin = require("workbox-webpack-plugin");
 
 module.exports = () => ({
     entry: [
@@ -52,5 +53,6 @@ module.exports = () => ({
         new MiniCssExtractPlugin({
             filename: "bundle.css",
         }),
+        new WorkboxPlugin.GenerateSW(),
     ],
 });
