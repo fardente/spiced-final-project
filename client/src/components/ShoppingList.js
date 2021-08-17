@@ -77,6 +77,12 @@ export default function ShoppingList() {
         setRenderItems(itemData);
     }
 
+    function onClearInput() {
+        setNewItem("");
+        setFilterTerm("");
+        setSearchTerm("");
+    }
+
     async function onAdd() {
         if (newItem == "") return;
         try {
@@ -205,7 +211,7 @@ export default function ShoppingList() {
                 </div>
                 <div className="inputGroup control">
                     <button
-                        // onClick={() => onAdd()}
+                        onClick={() => onClearInput()}
                         className="button is-medium is-danger"
                     >
                         <span className="icon is-large">
