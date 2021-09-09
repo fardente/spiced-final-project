@@ -12,9 +12,17 @@ export default function ShoppingListItem({
     </span>
   </button>
     */
+
+    function showModal() {
+        console.log("clicked", item_name);
+        return (
+
+        );
+    }
+
     return (
         <div className="columns is-mobile">
-            <div className="column is-flex-grow-0">
+            <div className="column is-flex-grow-0 shopping-item-button-div">
                 <button
                     className="button is-outlined is-danger is-light"
                     onClick={() => onDelete(id)}
@@ -25,8 +33,17 @@ export default function ShoppingListItem({
                     </span>
                 </button>
             </div>
-            <div className="column is-capitalized">{item_name}</div>
-            <div className="column is-flex-grow-0">
+            <div className="column is-capitalized shopping-item-text">
+                <button className="button is-text" onClick={showModal}>
+                    {item_name}
+                </button>
+                <div className="tags">
+                    <span className="tag is-black">Edeka</span>
+                    <span className="tag is-black">Edeka</span>
+                    <span className="tag is-black">Edeka</span>
+                </div>
+            </div>
+            <div className="column is-flex-grow-0 shopping-item-button-div">
                 <button
                     className={`button ${
                         checked
