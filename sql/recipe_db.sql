@@ -43,7 +43,8 @@ CREATE TABLE tags_items(
     id SERIAL PRIMARY KEY,
     tag_id INT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
     shopping_item_id INT REFERENCES items(id) ON DELETE CASCADE,
-    recipe_id INT REFERENCES recipes(id) ON DELETE CASCADE
+    recipe_id INT REFERENCES recipes(id) ON DELETE CASCADE,
+    UNIQUE (tag_id, shopping_item_id)
 );
 
 -- INSERT INTO items (item_name) VALUES ('Salz');
