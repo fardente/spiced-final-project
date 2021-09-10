@@ -37,6 +37,24 @@ export default function ShoppingItemDetails({
         console.log("newtag", response.data[0]);
     }
 
+    async function onRemoveTag(tag_id) {
+        console.log("remove tag", tag_id);
+        const response = await axios.post("/api/tags/remove", {
+            tag_id,
+            shopping_item_id: item.id,
+        });
+        console.log("details delete tag", response);
+        setItemData((prev) => {
+            return prev.map((prev_item) => {
+                if (prev_item.id == item.id) {
+                    prev_item.tags = prev_item.tags.filter(
+                        (tag) => tag.tag_id != tag_id
+                    );
+                }
+                return prev_item;
+            });
+        });
+    }
     return (
         <div className={`modal ${showItemDetails ? "is-active" : ""}`}>
             <div
@@ -56,7 +74,12 @@ export default function ShoppingItemDetails({
                                         className="tag is-rounded"
                                     >
                                         {tag.tag_name}
-                                        <button className="delete is-large"></button>
+                                        <button
+                                            className="delete is-large"
+                                            onClick={() =>
+                                                onRemoveTag(tag.tag_id)
+                                            }
+                                        ></button>
                                     </span>
                                 );
                             })}
