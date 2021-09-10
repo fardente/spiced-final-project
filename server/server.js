@@ -173,7 +173,19 @@ app.get("/api/ingredients/search", async (req, res) => {
 });
 
 // Get tags for item
-app.get("/api/item");
+// app.get("/api/item");
+
+// Remove tag from shopping item
+app.post("/api/tags/remove", async (req, res) => {
+    try {
+        console.log("server remove tag from item", req.body);
+        res.json(await db.removeTagFromItem(req.body));
+    } catch (error) {
+        console.error("server remove tag from item", error);
+        res.status(500);
+        // res.json({...error});
+    }
+});
 
 // Add tag
 app.post("/api/tags", async (req, res) => {

@@ -459,6 +459,18 @@ async function addTagToShoppingItem({ tag_id, shopping_item_id }) {
     }
 }
 
+async function removeTagFromItem({ tag_id, shopping_item_id }) {
+    try {
+        const { rows } = await db.query(
+            `DELETE FROM tags_items WHERE tag_id = $1 AND shopping_item_id = $2`,
+            [tag_id, shopping_item_id]
+        );
+        return rows;
+    } catch (error) {
+        console.error("db removeTagFromItem", error);
+    }
+}
+
 module.exports = {
     getShoppingItems,
     addNewShoppingItem,
@@ -486,4 +498,5 @@ module.exports = {
     getShoppingItemTags,
     addTag,
     addTagToShoppingItem,
+    removeTagFromItem,
 };
