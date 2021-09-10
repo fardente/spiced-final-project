@@ -190,13 +190,12 @@ export default function ShoppingList() {
             </div> */}
             <div className="columns is-centered shopping-items">
                 <div className="column is-half">
-                    <div className="container">
+                    <div className="container shopping-items-container">
                         {renderItems.map((item) => (
                             <ShoppingListItem
                                 key={item.id}
-                                id={item.id}
-                                item_name={item.item_name}
-                                checked={item.checked}
+                                item={item}
+                                setItemData={setItemData}
                                 onDelete={onDelete}
                                 onCheck={onCheck}
                             />

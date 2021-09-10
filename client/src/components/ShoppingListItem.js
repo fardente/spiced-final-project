@@ -1,10 +1,13 @@
+import { useState, useEffect } from "react";
+import ShoppingItemDetails from "./ShoppingItemDetails";
+
 export default function ShoppingListItem({
-    id,
-    item_name,
-    checked,
+    item,
+    setItemData,
     onDelete,
     onCheck,
 }) {
+    const { id, item_name, checked } = item;
     /*
       <button class="button">
     <span class="icon is-small">
@@ -12,12 +15,10 @@ export default function ShoppingListItem({
     </span>
   </button>
     */
+    const [showItemDetails, setShowItemDetails] = useState(false);
 
-    function showModal() {
-        console.log("clicked", item_name);
-        return (
-
-        );
+    function onShowItemDetailsClick() {
+        setShowItemDetails((prev) => !prev);
     }
 
     return (
@@ -34,13 +35,24 @@ export default function ShoppingListItem({
                 </button>
             </div>
             <div className="column is-capitalized shopping-item-text">
-                <button className="button is-text" onClick={showModal}>
+                <span
+                    className="is-clickable is-underlined"
+                    onClick={onShowItemDetailsClick}
+                >
                     {item_name}
-                </button>
+                </span>
                 <div className="tags">
-                    <span className="tag is-black">Edeka</span>
-                    <span className="tag is-black">Edeka</span>
-                    <span className="tag is-black">Edeka</span>
+                    {item.tags.map((tag) => {
+                        // console.log("item", item, "tag", tag);
+                        return (
+                            <span
+                                key={`${tag.tag_id}`}
+                                className="tag is-warning"
+                            >
+                                {tag.tag_name}
+                            </span>
+                        );
+                    })}
                 </div>
             </div>
             <div className="column is-flex-grow-0 shopping-item-button-div">
@@ -61,6 +73,16 @@ export default function ShoppingListItem({
                     </span>
                 </button>
             </div>
+            {showItemDetails ? (
+                <ShoppingItemDetails
+                    item={item}
+                    setItemData={setItemData}
+                    showItemDetails={showItemDetails}
+                    onShowItemDetailsClick={onShowItemDetailsClick}
+                />
+            ) : (
+                ""
+            )}
         </div>
     );
 }
