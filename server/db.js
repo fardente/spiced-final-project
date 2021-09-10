@@ -393,6 +393,72 @@ async function searchIngredients(query) {
     }
 }
 
+async function getShoppingItemTags({ id }) {
+    try {
+        const { rows } = await db.query(
+            `SELECT tag_id, tag_name FROM tags_items as ti
+            JOIN tags AS t
+            ON t.id = ti.tag_id
+            JOIN items as i
+            ON i.id = ti.shopping_item_id
+            WHERE i.id = $1`,
+            [id]
+        );
+        console.log("db getShoppingItemTags", rows, id);
+        return rows;
+    } catch (error) {
+        console.log("getShoppingItemTags", error);
+    }
+}
+
+async function addTag({ tag_name, shopping_item_id }) {
+    try {
+        let { rows } = await db.query(
+            `SELECT id AS tag_id, tag_name FROM tags WHERE tag_name = $1`,
+            [tag_name]
+        );
+        console.log("db addTag select result", rows);
+        if (rows.length < 1) {
+            ({ rows } = await db.query(
+                `INSERT INTO tags (tag_name) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id AS tag_id`,
+                [tag_name]
+            ));
+        }
+        console.log("db addTag first add rows", rows);
+        const new_tag_id = rows[0].tag_id;
+        console.log("db add Tag newtagid", new_tag_id, shopping_item_id);
+        const result = await addTagToShoppingItem({
+            tag_id: new_tag_id,
+            shopping_item_id,
+        });
+        if (result.length < 1) {
+            return null;
+        }
+        return result;
+    } catch (error) {
+        console.error("db addTag", error);
+        throw error;
+    }
+}
+
+async function addTagToShoppingItem({ tag_id, shopping_item_id }) {
+    try {
+        const { rows } = await db.query(
+            `INSERT INTO tags_items (tag_id, shopping_item_id) VALUES ($1, $2) RETURNING *`,
+            [tag_id, shopping_item_id]
+        );
+        console.log("db addTagToShoppingItem", rows);
+        if (rows.length < 1) {
+            console.log("addTagToShoppinItem rows", rows);
+            return rows;
+        }
+        return rows;
+    } catch (error) {
+        console.log("db addTagToItem", error);
+        throw error;
+    }
+}
+
 module.exports = {
     getShoppingItems,
     addNewShoppingItem,
@@ -417,4 +483,7 @@ module.exports = {
     deleteRecipeIngredients,
     deleteAllRecipeIngredients,
     getIngredientIdByName,
+    getShoppingItemTags,
+    addTag,
+    addTagToShoppingItem,
 };
