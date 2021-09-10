@@ -110,7 +110,17 @@ app.post("/api/recipes/delete", async (req, res) => {
 // Get all shopping items
 app.get("/api/shopping/items", async (req, res) => {
     console.log("getting shopping items");
-    res.json(await db.getShoppingItems());
+    // res.json(await db.getShoppingItems());
+    const items = await db.getShoppingItems();
+    console.log("server get shopping items items", items);
+    let result = [];
+    for (const item of items) {
+        const tags = await db.getShoppingItemTags(item);
+        console.log("tags", tags);
+        result.push({ ...item, tags });
+    }
+    console.log("server get shopping items res", result);
+    res.json(result);
 });
 
 // Add a shopping item
@@ -119,7 +129,7 @@ app.post("/api/shopping/add", async (req, res) => {
     const newItem = await db.addNewShoppingItem(req.body);
     const item_name = req.body.newItem;
     console.log("new", { ...newItem, item_name });
-    res.json({ ...newItem, item_name });
+    res.json({ ...newItem, item_name, tags: [] });
 });
 
 // Checkmark a shopping item
@@ -161,6 +171,24 @@ app.get("/api/ingredients/search", async (req, res) => {
         res.json({ ...error });
     }
 });
+
+// Get tags for item
+app.get("/api/item");
+
+// Add tag
+app.post("/api/tags", async (req, res) => {
+    try {
+        console.log("server add tag", req.body);
+        res.json(await db.addTag(req.body));
+    } catch (error) {
+        console.log("server add tag", error);
+        res.status(500);
+        res.json({ ...error });
+    }
+});
+
+// Add tag to shopping item
+// TODO
 
 app.get("*", function (req, res) {
     console.log("*ing");
