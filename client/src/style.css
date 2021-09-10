@@ -114,6 +114,47 @@ body {
     max-height: 69vh;
 }
 
+.shopping-items-container > div:nth-child(odd) {
+    background-color: rgb(225, 234, 241);
+}
+
+.shopping-item-button-div {
+    align-self: center;
+}
+
+.shopping-item-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.shopping-item-details {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+.tags {
+    justify-content: center;
+}
+
+.button.is-text {
+    font-size: 1em;
+}
+
+.button.is-text:hover {
+    background-color: transparent !important;
+}
+
+.button.is-text:active,
+.button.is-text.focus {
+    border: none;
+}
+
 .shopping-search-results {
     display: flex;
     /* flex-wrap: wrap; */
