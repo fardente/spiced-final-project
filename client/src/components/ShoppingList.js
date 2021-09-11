@@ -10,6 +10,7 @@ export default function ShoppingList() {
     const [searchResults, setSearchResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
     const [addItem, setAddItem] = useState(false);
+    const [tagFilterActive, setTagFilterActive] = useState(false);
 
     useEffect(async () => {
         const { data } = await axios.get("/api/shopping/items");
@@ -17,16 +18,22 @@ export default function ShoppingList() {
     }, []);
 
     useEffect(() => {
-        setRenderItems(itemData);
-    }, [itemData]);
-
-    useEffect(() => {
-        const res = itemData.filter(
+        let res = itemData.filter(
             (x) =>
                 x.item_name.toLowerCase().indexOf(newItem.toLowerCase()) != -1
         );
+        if (tagFilterActive) {
+            const tags = [{ tag_name: "Edeka" }, { tag_name: "Biocompany" }];
+            const tag_list = tags.map((item) => item.tag_name);
+            res = res.filter(
+                (item) =>
+                    item.tags.filter(
+                        (tag) => tag_list.indexOf(tag.tag_name) > -1
+                    ).length > 0
+            );
+        }
         setRenderItems(res);
-    }, [newItem]);
+    }, [itemData, newItem, tagFilterActive]);
 
     useEffect(async () => {
         setShowResults(false);
@@ -55,7 +62,7 @@ export default function ShoppingList() {
         setItemData((items) => items.filter((item) => item.id != id));
     }
 
-    async function onCheck(id, checked) {
+    async function onCheckItem(id, checked) {
         try {
             await axios.put("/api/shopping/check", { id, checked });
         } catch (error) {
@@ -69,7 +76,6 @@ export default function ShoppingList() {
                 return item;
             })
         );
-        setRenderItems(itemData);
     }
 
     function onClearInput() {
@@ -104,20 +110,11 @@ export default function ShoppingList() {
     // }
 
     function onFilterByTags() {
-        const tags = [{ tag_name: "Edeka" }, { tag_name: "Biocompany" }];
-        const tag_list = tags.map((item) => item.tag_name);
-        console.log("renderitems", renderItems);
-        const filtered = renderItems.filter(
-            (item) =>
-                item.tags.filter((tag) => tag_list.indexOf(tag.tag_name) > -1)
-                    .length > 0
-        );
-        console.log("tag filter", filtered);
-        setRenderItems(filtered);
+        setTagFilterActive(true);
     }
 
     function onClearFilterByTags() {
-        setRenderItems(itemData);
+        setTagFilterActive(false);
     }
 
     function onChange(event) {
@@ -216,7 +213,7 @@ export default function ShoppingList() {
                                 item={item}
                                 setItemData={setItemData}
                                 onDelete={onDelete}
-                                onCheck={onCheck}
+                                onCheck={onCheckItem}
                             />
                         ))}
                     </div>
