@@ -236,8 +236,17 @@ export default function ShoppingList() {
                                 })}
                             </div>
                             <div>
-                                <button type="submit" onClick={onFilterByTags}>
-                                    Add
+                                <button
+                                    className="button"
+                                    onClick={onFilterByTags}
+                                >
+                                    Save
+                                </button>
+                                <button
+                                    className="button"
+                                    onClick={onClearFilterByTags}
+                                >
+                                    Clear Filters
                                 </button>
                             </div>
                         </div>
@@ -254,12 +263,16 @@ export default function ShoppingList() {
 
     return (
         <div className="container has-text-centered shopping-container">
-            <div>
+            <div className="is-relative">
                 <h2 className="title">Shopping List</h2>
 
                 {showFilterTagModal ? renderTagFilterModal() : ""}
-                <button onClick={onShowFilterTagModal}>Filter</button>
-                <button onClick={onClearFilterByTags}>Clear Filters</button>
+                <button
+                    className="button btnFilter"
+                    onClick={onShowFilterTagModal}
+                >
+                    Filter
+                </button>
             </div>
             {/* <div className="container searchbox">
                 <div className="control has-icons-left">

@@ -142,6 +142,12 @@ body {
     justify-content: center;
 }
 
+.btnFilter {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
 .button.is-text {
     font-size: 1em;
 }
