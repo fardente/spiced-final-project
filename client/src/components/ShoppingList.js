@@ -6,7 +6,6 @@ import axios from "axios";
 export default function ShoppingList() {
     const [itemData, setItemData] = useState([]);
     const [renderItems, setRenderItems] = useState([]);
-    const [filterTerm, setFilterTerm] = useState("");
     const [newItem, setNewItem] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
@@ -24,25 +23,22 @@ export default function ShoppingList() {
     useEffect(() => {
         const res = itemData.filter(
             (x) =>
-                x.item_name.toLowerCase().indexOf(filterTerm.toLowerCase()) !=
-                -1
+                x.item_name.toLowerCase().indexOf(newItem.toLowerCase()) != -1
         );
         setRenderItems(res);
-    }, [filterTerm]);
+    }, [newItem]);
 
     useEffect(async () => {
         setShowResults(false);
-        if (filterTerm == "") {
+        if (newItem == "") {
             setSearchResults([]);
             setShowResults(false);
             return;
         }
-        const result = await axios.get(
-            "/api/ingredients/search?q=" + filterTerm
-        );
+        const result = await axios.get("/api/ingredients/search?q=" + newItem);
         setSearchResults(result.data);
         setShowResults(true);
-    }, [filterTerm]);
+    }, [newItem]);
 
     useEffect(() => {
         if (addItem) {
@@ -78,7 +74,6 @@ export default function ShoppingList() {
 
     function onClearInput() {
         setNewItem("");
-        setFilterTerm("");
     }
 
     async function onAdd() {
@@ -94,7 +89,6 @@ export default function ShoppingList() {
             console.log("onAdd error", error);
         }
         setNewItem("");
-        setFilterTerm("");
         setAddItem(false);
     }
 
@@ -129,7 +123,6 @@ export default function ShoppingList() {
     function onChange(event) {
         setShowResults(false);
         setNewItem(event.target.value);
-        setFilterTerm(event.target.value);
     }
 
     function checkExists(itemInput) {
