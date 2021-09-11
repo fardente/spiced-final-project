@@ -399,9 +399,9 @@ async function getShoppingItemTags({ id }) {
             `SELECT tag_id, tag_name FROM tags_items as ti
             JOIN tags AS t
             ON t.id = ti.tag_id
-            JOIN items as i
-            ON i.id = ti.shopping_item_id
-            WHERE i.id = $1`,
+            JOIN shopping_items as si
+            ON si.id = ti.shopping_item_id
+            WHERE si.id = $1`,
             [id]
         );
         console.log("db getShoppingItemTags", rows, id);
