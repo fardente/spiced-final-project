@@ -112,6 +112,23 @@ export default function ShoppingList() {
     //     setFilterTerm(event.target.value);
     // }
 
+    function onFilterByTags() {
+        const tags = [{ tag_name: "Edeka" }, { tag_name: "Biocompany" }];
+        const tag_list = tags.map((item) => item.tag_name);
+        console.log("renderitems", renderItems);
+        const filtered = renderItems.filter(
+            (item) =>
+                item.tags.filter((tag) => tag_list.indexOf(tag.tag_name) > -1)
+                    .length > 0
+        );
+        console.log("tag filter", filtered);
+        setRenderItems(filtered);
+    }
+
+    function onClearFilterByTags() {
+        setRenderItems(itemData);
+    }
+
     function onChange(event) {
         setShowResults(false);
         setNewItem(event.target.value);
@@ -160,7 +177,20 @@ export default function ShoppingList() {
 
     return (
         <div className="container has-text-centered shopping-container">
-            <h2 className="title">Shopping List</h2>
+            <div>
+                <h2 className="title">Shopping List</h2>
+                <div>
+                    <input type="checkbox" id="scales" name="scales" />
+                    <label htmlFor="scales">Scales</label>
+                </div>
+
+                <div>
+                    <input type="checkbox" id="horns" name="horns" />
+                    <label htmlFor="horns">Horns</label>
+                </div>
+                <button onClick={onFilterByTags}>Filter</button>
+                <button onClick={onClearFilterByTags}>Clear Filters</button>
+            </div>
             {/* <div className="container searchbox">
                 <div className="control has-icons-left">
                     <input
@@ -188,7 +218,7 @@ export default function ShoppingList() {
                     </a>
                 </div>
             </div> */}
-            <div className="columns is-centered shopping-items">
+            <div className="columns mt-0 is-centered shopping-items">
                 <div className="column is-half">
                     <div className="container shopping-items-container">
                         {renderItems.map((item) => (
