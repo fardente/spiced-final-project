@@ -10,7 +10,8 @@ export default function ShoppingList() {
     const [searchResults, setSearchResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
     const [addItem, setAddItem] = useState(false);
-    const [tagFilterActive, setTagFilterActive] = useState(false);
+    const [showFilterTagModal, setShowFilterTagModal] = useState(false);
+    const [filteredTags, setFilteredTags] = useState([]);
 
     useEffect(async () => {
         const { data } = await axios.get("/api/shopping/items");
@@ -22,18 +23,16 @@ export default function ShoppingList() {
             (x) =>
                 x.item_name.toLowerCase().indexOf(newItem.toLowerCase()) != -1
         );
-        if (tagFilterActive) {
-            const tags = [{ tag_name: "Edeka" }, { tag_name: "Biocompany" }];
-            const tag_list = tags.map((item) => item.tag_name);
+        if (filteredTags.length) {
             res = res.filter(
                 (item) =>
                     item.tags.filter(
-                        (tag) => tag_list.indexOf(tag.tag_name) > -1
+                        (tag) => filteredTags.indexOf(tag.tag_name) > -1
                     ).length > 0
             );
         }
         setRenderItems(res);
-    }, [itemData, newItem, tagFilterActive]);
+    }, [itemData, newItem, filteredTags]);
 
     useEffect(async () => {
         setShowResults(false);
@@ -87,12 +86,12 @@ export default function ShoppingList() {
         try {
             const { data } = await axios.post("/api/shopping/add", { newItem });
             if (data.error) {
-                console.log(data.error);
+                console.error(data.error);
             } else {
                 setItemData([data, ...itemData]);
             }
         } catch (error) {
-            console.log("onAdd error", error);
+            console.error("onAdd error", error);
         }
         setNewItem("");
         setAddItem(false);
@@ -109,17 +108,38 @@ export default function ShoppingList() {
     //     setFilterTerm(event.target.value);
     // }
 
+    function onShowFilterTagModal() {
+        setShowFilterTagModal(true);
+    }
+
+    function onCloseFilterTagModal() {
+        setShowFilterTagModal(false);
+    }
+
     function onFilterByTags() {
-        setTagFilterActive(true);
+        onCloseFilterTagModal();
     }
 
     function onClearFilterByTags() {
-        setTagFilterActive(false);
+        setFilteredTags([]);
     }
 
     function onChange(event) {
         setShowResults(false);
         setNewItem(event.target.value);
+    }
+
+    function onChangeTagFilter(event, tag) {
+        if (event.target.checked) {
+            if (filteredTags.includes(tag)) return;
+            setFilteredTags((prev) => [...prev, tag]);
+            return;
+        }
+        setFilteredTags((prev) => prev.filter((item) => item != tag));
+    }
+
+    function isChecked(tag) {
+        return filteredTags.includes(tag);
     }
 
     function checkExists(itemInput) {
@@ -161,20 +181,84 @@ export default function ShoppingList() {
         });
     }
 
+    function getUsedTags() {
+        return [
+            ...new Set(
+                itemData
+                    .map((item) => {
+                        return item.tags;
+                    })
+                    .map((tags) => tags.map((item) => item.tag_name))
+                    .flat()
+            ),
+        ];
+    }
+
+    function renderTagFilterModal() {
+        return (
+            <div className={`modal ${showFilterTagModal ? "is-active" : ""}`}>
+                <div
+                    className="modal-background"
+                    onClick={onCloseFilterTagModal}
+                ></div>
+                <div className="modal-content">
+                    <div className="container m-3">
+                        <div className="box">
+                            <h2>Filter List by Tags </h2>
+                            <div className="field is-grouped is-grouped-multiline">
+                                {getUsedTags().map((tag) => {
+                                    return (
+                                        <div key={`${tag}`} className="control">
+                                            <div className="tags"></div>
+                                            <label
+                                                htmlFor={tag}
+                                                className="tag is-warning is-large is-rounded"
+                                            >
+                                                {tag}
+                                                <span className="tag is-warning">
+                                                    {" "}
+                                                    <input
+                                                        type="checkbox"
+                                                        id={tag}
+                                                        name={tag}
+                                                        checked={isChecked(tag)}
+                                                        onChange={(event) =>
+                                                            onChangeTagFilter(
+                                                                event,
+                                                                tag
+                                                            )
+                                                        }
+                                                    />
+                                                </span>
+                                            </label>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div>
+                                <button type="submit" onClick={onFilterByTags}>
+                                    Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button
+                    className="modal-close is-large"
+                    onClick={onCloseFilterTagModal}
+                    aria-label="close"
+                ></button>
+            </div>
+        );
+    }
+
     return (
         <div className="container has-text-centered shopping-container">
             <div>
                 <h2 className="title">Shopping List</h2>
-                <div>
-                    <input type="checkbox" id="scales" name="scales" />
-                    <label htmlFor="scales">Scales</label>
-                </div>
 
-                <div>
-                    <input type="checkbox" id="horns" name="horns" />
-                    <label htmlFor="horns">Horns</label>
-                </div>
-                <button onClick={onFilterByTags}>Filter</button>
+                {showFilterTagModal ? renderTagFilterModal() : ""}
+                <button onClick={onShowFilterTagModal}>Filter</button>
                 <button onClick={onClearFilterByTags}>Clear Filters</button>
             </div>
             {/* <div className="container searchbox">
