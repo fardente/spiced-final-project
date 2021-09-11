@@ -71,7 +71,7 @@ export default function ShoppingItemDetails({
                                 return (
                                     <span
                                         key={`${tag.tag_id}`}
-                                        className="tag is-rounded"
+                                        className="tag is-warning is-rounded"
                                     >
                                         {tag.tag_name}
                                         <button
