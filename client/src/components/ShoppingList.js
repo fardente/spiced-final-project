@@ -8,7 +8,6 @@ export default function ShoppingList() {
     const [renderItems, setRenderItems] = useState([]);
     const [filterTerm, setFilterTerm] = useState("");
     const [newItem, setNewItem] = useState("");
-    const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [showResults, setShowResults] = useState(false);
     const [addItem, setAddItem] = useState(false);
@@ -33,17 +32,17 @@ export default function ShoppingList() {
 
     useEffect(async () => {
         setShowResults(false);
-        if (searchTerm == "") {
+        if (filterTerm == "") {
             setSearchResults([]);
             setShowResults(false);
             return;
         }
         const result = await axios.get(
-            "/api/ingredients/search?q=" + searchTerm
+            "/api/ingredients/search?q=" + filterTerm
         );
         setSearchResults(result.data);
         setShowResults(true);
-    }, [searchTerm]);
+    }, [filterTerm]);
 
     useEffect(() => {
         if (addItem) {
@@ -80,7 +79,6 @@ export default function ShoppingList() {
     function onClearInput() {
         setNewItem("");
         setFilterTerm("");
-        setSearchTerm("");
     }
 
     async function onAdd() {
@@ -97,7 +95,6 @@ export default function ShoppingList() {
         }
         setNewItem("");
         setFilterTerm("");
-        setSearchTerm("");
         setAddItem(false);
     }
 
@@ -132,7 +129,6 @@ export default function ShoppingList() {
     function onChange(event) {
         setShowResults(false);
         setNewItem(event.target.value);
-        setSearchTerm(event.target.value);
         setFilterTerm(event.target.value);
     }
 
