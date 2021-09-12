@@ -8,7 +8,6 @@ export default function ShoppingItemDetails({
     setItemData,
 }) {
     const { item_name } = item;
-
     const [newTag, setNewTag] = useState("");
 
     function onChangeTag(event) {
@@ -17,14 +16,12 @@ export default function ShoppingItemDetails({
     }
 
     async function onAddTag() {
-        console.log("add tag");
         const response = await axios.post("/api/tags", {
             tag_name: newTag,
             shopping_item_id: item.id,
         });
         const tagToAdd = { tag_id: response.data[0].tag_id, tag_name: newTag };
         setItemData((prev) => {
-            console.log("prev", prev, tagToAdd);
             return prev.map((prev_item) => {
                 console.log("state_item", prev_item, item.id);
                 if (prev_item.id == item.id) {
@@ -34,16 +31,21 @@ export default function ShoppingItemDetails({
                 return prev_item;
             });
         });
-        console.log("newtag", response.data[0]);
+        setNewTag("");
+    }
+
+    function checkKey(event) {
+        if (event.key == "Enter") {
+            event.preventDefault();
+            onAddTag();
+        }
     }
 
     async function onRemoveTag(tag_id) {
-        console.log("remove tag", tag_id);
         const response = await axios.post("/api/tags/remove", {
             tag_id,
             shopping_item_id: item.id,
         });
-        console.log("details delete tag", response);
         setItemData((prev) => {
             return prev.map((prev_item) => {
                 if (prev_item.id == item.id) {
@@ -91,6 +93,7 @@ export default function ShoppingItemDetails({
                                     type="text"
                                     placeholder="Add tag..."
                                     value={newTag}
+                                    onKeyPress={checkKey}
                                     onChange={onChangeTag}
                                 />
                             </div>
