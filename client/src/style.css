@@ -3,6 +3,31 @@ body {
     max-height: 99vh;
 }
 
+.button {
+    box-shadow: 2px 3px 1px 0px lightsteelblue;
+}
+
+.input {
+    box-shadow: inset 0 0.0625em 0.125em rgb(10 10 10 / 5%),
+        2px 3px 1px 0px lightsteelblue;
+}
+
+.textarea {
+    box-shadow: 2px 3px 1px 0px lightsteelblue;
+}
+
+.tag {
+    box-shadow: 2px 3px 1px 0px lightsteelblue;
+}
+
+.box {
+    box-shadow: 2px 3px 1px 0px lightsteelblue;
+}
+
+.hero {
+    border-radius: 6px;
+}
+
 .preparation {
     white-space: pre-wrap;
 }
@@ -116,6 +141,10 @@ body {
 
 .shopping-items-container > div:nth-child(odd) {
     background-color: rgb(225, 234, 241);
+}
+
+.shopping-item-wrapper {
+    border-radius: 6px;
 }
 
 .shopping-item-wrapper.checked {
