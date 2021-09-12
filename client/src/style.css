@@ -118,6 +118,11 @@ body {
     background-color: rgb(225, 234, 241);
 }
 
+.shopping-item-wrapper.checked {
+    background-color: rgb(229 255 238) !important;
+    border-top: 1px solid lightgray;
+}
+
 .shopping-item-button-div {
     align-self: center;
 }

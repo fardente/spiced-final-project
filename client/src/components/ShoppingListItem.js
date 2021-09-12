@@ -22,7 +22,11 @@ export default function ShoppingListItem({
     }
 
     return (
-        <div className="columns is-mobile">
+        <div
+            className={`columns is-mobile shopping-item-wrapper ${
+                checked ? "checked" : ""
+            }`}
+        >
             <div className="column is-flex-grow-0 shopping-item-button-div">
                 <button
                     className="button is-outlined is-danger is-light"
