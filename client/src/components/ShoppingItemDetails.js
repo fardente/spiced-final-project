@@ -64,8 +64,8 @@ export default function ShoppingItemDetails({
             <div className="modal-content">
                 <div className="container m-3">
                     <div className="box">
-                        {item_name}
-                        <div className="tags are-large is-flex-direction-column is-align-items-flex-start">
+                        <h4 className="title is-4">{item_name}</h4>
+                        <div className="tags are-large is-align-items-flex-start">
                             {item.tags.map((tag) => {
                                 console.log("item", item, "tag", tag);
                                 return (
@@ -84,16 +84,21 @@ export default function ShoppingItemDetails({
                                 );
                             })}
                         </div>
-                        <div>
-                            <input
-                                type="text"
-                                placehold="Add tag..."
-                                value={newTag}
-                                onChange={onChangeTag}
-                            ></input>
-                            <button type="submit" onClick={onAddTag}>
-                                Add
-                            </button>
+                        <div className="field has-addons has-addons-centered">
+                            <div className="control">
+                                <input
+                                    className="input"
+                                    type="text"
+                                    placeholder="Add tag..."
+                                    value={newTag}
+                                    onChange={onChangeTag}
+                                />
+                            </div>
+                            <div className="control">
+                                <button className="button" onClick={onAddTag}>
+                                    Add
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
