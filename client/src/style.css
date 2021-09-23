@@ -20,6 +20,10 @@ body {
     box-shadow: 2px 3px 1px 0px lightsteelblue;
 }
 
+.tag .tag {
+    box-shadow: none;
+}
+
 .box {
     box-shadow: 2px 3px 1px 0px lightsteelblue;
 }
