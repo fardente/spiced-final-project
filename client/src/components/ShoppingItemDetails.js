@@ -95,6 +95,7 @@ export default function ShoppingItemDetails({
                                     value={newTag}
                                     onKeyPress={checkKey}
                                     onChange={onChangeTag}
+                                    autoFocus
                                 />
                             </div>
                             <div className="control">
