@@ -6,7 +6,7 @@ const uploader = require("./uploader");
 const app = express();
 
 const PORT = process.env.PORT || 3001;
-const awsBucketUrl = "https://nandoseimer.s3.amazonaws.com/";
+const uploadLocation = "./uploads/";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -44,7 +44,7 @@ app.post("/api/recipes/add", uploader.single("file"), async (req, res) => {
     const recipeItemsResult = await db.addRecipeIngredients(recipeItems);
     // add image
     if (req.file) {
-        req.body.url = awsBucketUrl + req.file.filename;
+        req.body.url = uploadLocation + req.file.filename;
         if (req.file) {
             await db.updateImage(recipe_id, req.body.url);
         }
@@ -55,7 +55,7 @@ app.post("/api/recipes/add", uploader.single("file"), async (req, res) => {
 
 // Update image
 app.put("/api/recipes/:id/image", uploader.single("file"), async (req, res) => {
-    req.body.url = awsBucketUrl + req.file.filename;
+    req.body.url = uploadLocation + req.file.filename;
     if (req.file) {
         let result = await db.updateImage(req.params.id, req.body.url);
         console.log("server updateimage result", result);
