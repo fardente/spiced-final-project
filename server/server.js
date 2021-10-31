@@ -2,7 +2,6 @@ const express = require("express");
 const path = require("path");
 const db = require("./db");
 const uploader = require("./uploader");
-const { upload } = require("./s3");
 
 const app = express();
 
@@ -27,61 +26,51 @@ app.get("/api/recipes/:id", async (req, res) => {
 });
 
 // Add recipe
-app.post(
-    "/api/recipes/add",
-    uploader.single("file"),
-    upload,
-    async (req, res) => {
-        //addRecipe -> get recipe_id
-        console.log("server adding recipe", req.body, "req.file", req.file);
-        const recipe_id = await db.addRecipe(req.body);
-        //addIngredients -> get [item_ids]
-        const ingredients = JSON.parse(req.body.ingredients);
-        const ingredient_ids = await db.addIngredients(ingredients);
-        // handle recipe exists
-        if (recipe_id.error) {
-            res.statusCode = 400;
-            res.json(recipe_id);
-            return;
-        }
-        // addRecipeIngredients
-        const recipeItems = { recipe_id, ingredient_ids };
-        const recipeItemsResult = await db.addRecipeIngredients(recipeItems);
-        // add image
-        if (req.file) {
-            req.body.url = awsBucketUrl + req.file.filename;
-            if (req.file) {
-                await db.updateImage(recipe_id, req.body.url);
-            }
-        }
-
-        res.json(recipeItemsResult);
+app.post("/api/recipes/add", uploader.single("file"), async (req, res) => {
+    //addRecipe -> get recipe_id
+    console.log("server adding recipe", req.body, "req.file", req.file);
+    const recipe_id = await db.addRecipe(req.body);
+    //addIngredients -> get [item_ids]
+    const ingredients = JSON.parse(req.body.ingredients);
+    const ingredient_ids = await db.addIngredients(ingredients);
+    // handle recipe exists
+    if (recipe_id.error) {
+        res.statusCode = 400;
+        res.json(recipe_id);
+        return;
     }
-);
-
-// Update image
-app.put(
-    "/api/recipes/:id/image",
-    uploader.single("file"),
-    upload,
-    async (req, res) => {
+    // addRecipeIngredients
+    const recipeItems = { recipe_id, ingredient_ids };
+    const recipeItemsResult = await db.addRecipeIngredients(recipeItems);
+    // add image
+    if (req.file) {
         req.body.url = awsBucketUrl + req.file.filename;
         if (req.file) {
-            let result = await db.updateImage(req.params.id, req.body.url);
-            console.log("server updateimage result", result);
-            if (result) {
-                res.json(result);
-            } else {
-                res.statusCode = 500;
-                res.json();
-            }
-        } else {
-            res.json({
-                success: false,
-            });
+            await db.updateImage(recipe_id, req.body.url);
         }
     }
-);
+
+    res.json(recipeItemsResult);
+});
+
+// Update image
+app.put("/api/recipes/:id/image", uploader.single("file"), async (req, res) => {
+    req.body.url = awsBucketUrl + req.file.filename;
+    if (req.file) {
+        let result = await db.updateImage(req.params.id, req.body.url);
+        console.log("server updateimage result", result);
+        if (result) {
+            res.json(result);
+        } else {
+            res.statusCode = 500;
+            res.json();
+        }
+    } else {
+        res.json({
+            success: false,
+        });
+    }
+});
 
 // Update a recipe
 app.put("/api/recipes", async (req, res) => {
