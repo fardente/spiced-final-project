@@ -1,12 +1,13 @@
-const pg = require("spiced-pg");
+const { Pool } = require("pg");
 
-let db;
-if (process.env.DATABASE_URL) {
-    db = pg(process.env.DATABASE_URL);
-} else {
-    const { dbUser, dbPass } = require("./secrets.json");
-    db = pg(`postgres:${dbUser}:${dbPass}@localhost:5432/recipemanager`);
-}
+const credentials = {
+    host: process.env.DATABASE_HOST,
+    port: process.env.DATABASE_PORT,
+    database: process.env.DATABASE_NAME,
+    user: process.env.DATABASE_USER,
+    password: process.env.DATABASE_PASS,
+};
+const db = new Pool(credentials);
 
 function stringHelper(string) {
     string = string.trim();

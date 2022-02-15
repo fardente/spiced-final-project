@@ -10,7 +10,7 @@ module.exports = () => ({
         path.join(__dirname, "client", "src", "index.js"),
     ],
     output: {
-        path: path.join(__dirname, "client", "public"),
+        path: path.join(__dirname, "client", "public", "dist"),
         filename: "bundle.js",
     },
     performance: {
@@ -21,10 +21,6 @@ module.exports = () => ({
         proxy: {
             "/": {
                 target: "http://localhost:3001",
-            },
-            "/socket.io": {
-                target: "http://localhost:3001",
-                ws: true,
             },
         },
         port: "3000",
