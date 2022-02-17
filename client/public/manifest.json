@@ -19,7 +19,7 @@
             "purpose": "maskable"
         }
     ],
-    "start_url": "/",
+    "start_url": "https://konsum.fardente.de",
     "theme_color": "#eff5fb",
     "background_color": "#eff5fb",
     "display": "standalone"
