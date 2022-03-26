@@ -199,6 +199,11 @@ body {
     border: none;
 }
 
+.button.is-success.is-outlined:focus {
+    background-color: transparent;
+    color: #257953;
+}
+
 .shopping-search-results {
     display: flex;
     /* flex-wrap: wrap; */
