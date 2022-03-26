@@ -1,12 +1,19 @@
 const { Pool } = require("pg");
 
-const credentials = {
-    host: process.env.DATABASE_HOST,
-    port: process.env.DATABASE_PORT,
-    database: process.env.DATABASE_NAME,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASS,
-};
+let credentials;
+
+if (process.env.DATABASE_HOST) {
+    credentials = {
+        host: process.env.DATABASE_HOST,
+        port: process.env.DATABASE_PORT,
+        database: process.env.DATABASE_NAME,
+        user: process.env.DATABASE_USER,
+        password: process.env.DATABASE_PASS,
+    };
+} else {
+    credentials = require("./secrets.json");
+}
+
 const db = new Pool(credentials);
 
 function stringHelper(string) {
