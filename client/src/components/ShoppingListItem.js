@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ShoppingItemDetails from "./ShoppingItemDetails";
 
 export default function ShoppingListItem({
@@ -19,6 +19,10 @@ export default function ShoppingListItem({
 
     function onShowItemDetailsClick() {
         setShowItemDetails((prev) => !prev);
+    }
+
+    function capitalize(input) {
+        return input[0].toUpperCase() + input.slice(1);
     }
 
     return (
@@ -43,7 +47,7 @@ export default function ShoppingListItem({
                     className="is-clickable is-underlined"
                     onClick={onShowItemDetailsClick}
                 >
-                    {item_name}
+                    {capitalize(item_name)}
                 </span>
                 <div className="tags">
                     {item.tags.map((tag) => {
