@@ -98,14 +98,11 @@ app.post("/api/recipes/delete", async (req, res) => {
 
 // Get all shopping items
 app.get("/api/shopping/items", async (req, res) => {
-    console.log("getting shopping items");
     // res.json(await db.getShoppingItems());
     const items = await db.getShoppingItems();
-    console.log("server get shopping items items", items);
     let result = [];
     for (const item of items) {
         const tags = await db.getShoppingItemTags(item);
-        console.log("tags", tags);
         result.push({ ...item, tags });
     }
     console.log("server get shopping items res", result);
@@ -114,7 +111,6 @@ app.get("/api/shopping/items", async (req, res) => {
 
 // Add a shopping item
 app.post("/api/shopping/add", async (req, res) => {
-    console.log("server adding shopping item", req.body);
     const newItem = await db.addNewShoppingItem(req.body);
     const item_name = req.body.newItem;
     console.log("new", { ...newItem, item_name });

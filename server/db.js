@@ -17,6 +17,7 @@ if (process.env.DATABASE_HOST) {
 const db = new Pool(credentials);
 
 function stringHelper(string) {
+    console.log("string", string);
     string = string.trim();
     string = string.charAt(0).toUpperCase() + string.slice(1);
     return string;
@@ -41,12 +42,9 @@ async function getShoppingItems() {
 async function addNewShoppingItem({ newItem }) {
     newItem = stringHelper(newItem);
     try {
-        console.log("db addnews", newItem);
         const id = await addIngredient(newItem);
-        console.log("added, new/old id: ", id);
         const res = await addShoppingItem(id);
         if (res.length < 1) return { error: "already on list" };
-        console.log("added so shopping:", res);
         return res[0];
     } catch (error) {
         console.error("DB addNewShoppingItem error ", error);
@@ -54,13 +52,11 @@ async function addNewShoppingItem({ newItem }) {
 }
 
 async function addShoppingItem(id) {
-    console.log("adding shoopinitembyid", id);
     try {
         const { rows } = await db.query(
             `INSERT INTO shopping_items (item_id) VALUES ($1) ON CONFLICT DO NOTHING RETURNING *`,
             [id]
         );
-        console.log("adding shoppinbyid", rows);
         return rows;
     } catch (error) {
         console.error("db add shopping item", id, error);
@@ -412,10 +408,9 @@ async function getShoppingItemTags({ id }) {
             WHERE si.id = $1`,
             [id]
         );
-        console.log("db getShoppingItemTags", rows, id);
         return rows;
     } catch (error) {
-        console.log("getShoppingItemTags", error);
+        console.error("getShoppingItemTags", error);
     }
 }
 
@@ -425,16 +420,13 @@ async function addTag({ tag_name, shopping_item_id }) {
             `SELECT id AS tag_id, tag_name FROM tags WHERE tag_name = $1`,
             [tag_name]
         );
-        console.log("db addTag select result", rows);
         if (rows.length < 1) {
             ({ rows } = await db.query(
                 `INSERT INTO tags (tag_name) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id AS tag_id`,
                 [tag_name]
             ));
         }
-        console.log("db addTag first add rows", rows);
         const new_tag_id = rows[0].tag_id;
-        console.log("db add Tag newtagid", new_tag_id, shopping_item_id);
         const result = await addTagToShoppingItem({
             tag_id: new_tag_id,
             shopping_item_id,
@@ -455,14 +447,12 @@ async function addTagToShoppingItem({ tag_id, shopping_item_id }) {
             `INSERT INTO tags_items (tag_id, shopping_item_id) VALUES ($1, $2) RETURNING *`,
             [tag_id, shopping_item_id]
         );
-        console.log("db addTagToShoppingItem", rows);
         if (rows.length < 1) {
-            console.log("addTagToShoppinItem rows", rows);
             return rows;
         }
         return rows;
     } catch (error) {
-        console.log("db addTagToItem", error);
+        console.error("db addTagToItem", error);
         throw error;
     }
 }
