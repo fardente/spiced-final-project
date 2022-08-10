@@ -5,33 +5,21 @@ import axios from "axios";
 
 export default function RecipeList() {
     const [recipes, setRecipes] = useState([]);
-    const [tempItems, setTempItems] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(async () => {
         const { data } = await axios.get("/api/recipes");
         setRecipes(data);
-        setTempItems(data);
     }, []);
-
-    useEffect(() => {
-        const res = tempItems.filter(
-            (x) =>
-                x.recipe_name.toLowerCase().indexOf(searchTerm.toLowerCase()) !=
-                -1
-        );
-        setRecipes(res);
-    }, [searchTerm]);
 
     function onSearch(event) {
         setSearchTerm(event.target.value);
     }
 
-    /*
-      <div class='container has-text-centered'>
-    <div class='columns is-mobile is-centered'>
-      < class='column is-5'>
-    */
+    const filteredRecipes = recipes.filter(
+        (x) =>
+            x.recipe_name.toLowerCase().indexOf(searchTerm.toLowerCase()) != -1
+    );
 
     return (
         <div className="container has-text-centered mb-6">
@@ -77,7 +65,7 @@ export default function RecipeList() {
             </div>
 
             <div className="columns is-multiline">
-                {recipes.map((recipe) => (
+                {filteredRecipes.map((recipe) => (
                     <RecipeListItem
                         key={recipe.id}
                         id={recipe.id}
