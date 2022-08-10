@@ -5,52 +5,55 @@ import axios from "axios";
 
 export default function ShoppingList() {
     const [itemData, setItemData] = useState([]);
-    const [renderItems, setRenderItems] = useState([]);
-    const [newItem, setNewItem] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
-    const [showResults, setShowResults] = useState(false);
-    const [addItem, setAddItem] = useState(false);
+    const [currentInputValue, setCurrentInputValue] = useState("");
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
     const [showFilterTagModal, setShowFilterTagModal] = useState(false);
     const [filteredTags, setFilteredTags] = useState([]);
+
+    function filterItems(items) {
+        const bySearch = filterItemsBySearch(items);
+        if (filteredTags.length) {
+            return filterItemsByTag(bySearch);
+        }
+        return bySearch;
+    }
+
+    function filterItemsBySearch(items) {
+        return items.filter(
+            (x) =>
+                x.item_name
+                    .toLowerCase()
+                    .indexOf(currentInputValue.toLowerCase()) != -1
+        );
+    }
+
+    function filterItemsByTag(items) {
+        return items.filter(
+            (item) =>
+                item.tags.filter(
+                    (tag) => filteredTags.indexOf(tag.tag_name) > -1
+                ).length > 0
+        );
+    }
 
     useEffect(async () => {
         const { data } = await axios.get("/api/shopping/items");
         setItemData(data);
     }, []);
 
-    useEffect(() => {
-        let res = itemData.filter(
-            (x) =>
-                x.item_name.toLowerCase().indexOf(newItem.toLowerCase()) != -1
-        );
-        if (filteredTags.length) {
-            res = res.filter(
-                (item) =>
-                    item.tags.filter(
-                        (tag) => filteredTags.indexOf(tag.tag_name) > -1
-                    ).length > 0
-            );
-        }
-        setRenderItems(res);
-    }, [itemData, newItem, filteredTags]);
-
     useEffect(async () => {
-        setShowResults(false);
-        if (newItem == "") {
-            setSearchResults([]);
-            setShowResults(false);
-            return;
+        if (currentInputValue === "") {
+            setSuggestions([]);
+            setShowSuggestions(false);
+        } else {
+            const result = await axios.get(
+                "/api/ingredients/search?q=" + currentInputValue
+            );
+            setSuggestions(result.data);
+            setShowSuggestions(true);
         }
-        const result = await axios.get("/api/ingredients/search?q=" + newItem);
-        setSearchResults(result.data);
-        setShowResults(true);
-    }, [newItem]);
-
-    useEffect(() => {
-        if (addItem) {
-            onAdd();
-        }
-    }, [addItem]);
+    }, [currentInputValue]);
 
     async function onDelete(id) {
         try {
@@ -78,13 +81,15 @@ export default function ShoppingList() {
     }
 
     function onClearInput() {
-        setNewItem("");
+        setCurrentInputValue("");
     }
 
-    async function onAdd() {
-        if (newItem == "") return;
+    async function onAdd(inputValue) {
+        if (inputValue == "") return;
         try {
-            const { data } = await axios.post("/api/shopping/add", { newItem });
+            const { data } = await axios.post("/api/shopping/add", {
+                newItem: inputValue,
+            });
             if (data.error) {
                 console.error(data.error);
             } else {
@@ -93,20 +98,15 @@ export default function ShoppingList() {
         } catch (error) {
             console.error("onAdd error", error);
         }
-        setNewItem("");
-        setAddItem(false);
+        setCurrentInputValue("");
     }
 
     function checkKey(event) {
         if (event.key == "Enter") {
             event.preventDefault();
-            onAdd();
+            onAdd(currentInputValue);
         }
     }
-
-    // function onFilter(event) {
-    //     setFilterTerm(event.target.value);
-    // }
 
     function onShowFilterTagModal() {
         setShowFilterTagModal(true);
@@ -124,9 +124,8 @@ export default function ShoppingList() {
         setFilteredTags([]);
     }
 
-    function onChange(event) {
-        setShowResults(false);
-        setNewItem(event.target.value);
+    function onType(event) {
+        setCurrentInputValue(event.target.value);
     }
 
     function onChangeTagFilter(event, tag) {
@@ -142,29 +141,21 @@ export default function ShoppingList() {
         return filteredTags.includes(tag);
     }
 
-    function checkExists(itemInput) {
-        const filtered = renderItems.filter(
-            (item) => item.item_name == itemInput
-        );
+    function isAlreadyOnList(itemInput) {
+        const filtered = itemData.filter((item) => item.item_name == itemInput);
         if (filtered.length > 0) {
             return true;
         }
         return false;
     }
 
-    function onClickResult(item_name) {
-        setNewItem(item_name);
-        setShowResults(false);
-        setAddItem(true);
-    }
-
-    function renderResults() {
-        return searchResults.map((item) => {
-            if (checkExists(item.item_name)) return;
+    function renderSuggestions() {
+        return suggestions.map((item) => {
+            if (isAlreadyOnList(item.item_name)) return;
             return (
                 <div key={item.id} className="shopping-search-result">
                     <div
-                        onClick={() => onClickResult(item.item_name)}
+                        onClick={() => onAdd(item.item_name)}
                         className="button is-light"
                     >
                         {item.item_name}
@@ -261,6 +252,7 @@ export default function ShoppingList() {
         );
     }
 
+    let filteredItems = filterItems(itemData);
     return (
         <div className="container has-text-centered shopping-container">
             <div className="is-relative">
@@ -274,37 +266,10 @@ export default function ShoppingList() {
                     Filter
                 </button>
             </div>
-            {/* <div className="container searchbox">
-                <div className="control has-icons-left">
-                    <input
-                        className="input"
-                        type="text"
-                        name="filterInput"
-                        placeholder="Filter list..."
-                        value={filterTerm}
-                        onChange={(event) => onFilter(event)}
-                    ></input>{" "}
-                    <span className="icon is-small is-left">
-                        <ion-icon name="search-outline"></ion-icon>
-                    </span>
-                </div>
-                <div className="control">
-                    <a
-                        className="button"
-                        onClick={() => {
-                            setFilterTerm("");
-                        }}
-                    >
-                        <span className="icon is-small is-left">
-                            <ion-icon name="close-outline"></ion-icon>
-                        </span>
-                    </a>
-                </div>
-            </div> */}
             <div className="columns mt-0 is-centered shopping-items">
                 <div className="column is-half">
                     <div className="container shopping-items-container">
-                        {renderItems.map((item) => (
+                        {filteredItems.map((item) => (
                             <ShoppingListItem
                                 key={item.id}
                                 item={item}
@@ -319,7 +284,7 @@ export default function ShoppingList() {
             {/* <ShoppingInput /> */}
             <div className="inputBoxRow field">
                 <div className="shopping-search-results has-background-dark">
-                    {showResults ? renderResults() : ""}
+                    {showSuggestions ? renderSuggestions() : ""}
                 </div>
                 <div className="inputGroup control">
                     <button
@@ -337,12 +302,12 @@ export default function ShoppingList() {
                         className="input is-medium"
                         type="text"
                         placeholder="Add item..."
-                        value={newItem}
+                        value={currentInputValue}
                         onKeyPress={checkKey}
-                        onChange={(event) => onChange(event)}
+                        onChange={(event) => onType(event)}
                     ></input>
                     <button
-                        onClick={() => onAdd()}
+                        onClick={() => onAdd(currentInputValue)}
                         className="button is-medium is-success"
                     >
                         <span className="icon is-large">
