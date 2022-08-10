@@ -1,0 +1,37 @@
+version: "3"
+services:
+    db:
+        image: postgres
+        restart: always
+        ports:
+            - "127.0.0.1:5555:5432"
+        volumes:
+            - db-volume1:/var/lib/postgresql/data
+            - ./sql/recipe_db.sql:/docker-entrypoint-initdb.d/create_tables.sql
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: recipemanager
+    app:
+        container_name: recipe_app
+        build: .
+        depends_on:
+            - db
+        external_links:
+            - db
+        ports:
+            - "127.0.0.1:3001:3002"
+        volumes:
+            - foto-volume1:/app/uploads
+            - foto-volume2:/app/client/public/uploads
+        environment:
+            DATABASE_USER: postgres
+            DATABASE_PASS: postgres
+            DATABASE_HOST: db
+            DATABASE_NAME: recipemanager
+            DATABASE_PORT: "5432"
+            PORT: "3002"
+volumes:
+    db-volume1:
+    foto-volume1:
+    foto-volume2:
